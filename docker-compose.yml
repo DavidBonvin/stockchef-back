@@ -1,0 +1,112 @@
+services:
+  # Aplicación Spring Boot
+  stockchef-backend:
+    build: .
+    container_name: stockchef-backend
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-${DATABASE_TYPE:-mysql}
+      - JAVA_OPTS=-Xmx1024m -Xms512m
+    networks:
+      - stockchef-network
+    restart: unless-stopped
+    profiles:
+      - app
+
+  # Base de datos MySQL
+  mysql:
+    image: mysql:8.4
+    container_name: stockchef-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: UserAdmin
+      MYSQL_DATABASE: stockchef_db
+      MYSQL_USER: stockchef_user
+      MYSQL_PASSWORD: UserAdmin
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - stockchef-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pUserAdmin"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:18
+    container_name: stockchef-postgres
+    environment:
+      POSTGRES_DB: stockchef_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: UserAdmin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - stockchef-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # PHPMyAdmin (opcional para administración de MySQL)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: stockchef-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: UserAdmin
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - stockchef-network
+    restart: unless-stopped
+    profiles:
+      - tools
+
+  # pgAdmin (opcional para administración de PostgreSQL)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: stockchef-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@stockchef.com
+      PGADMIN_DEFAULT_PASSWORD: UserAdmin
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - stockchef-network
+    restart: unless-stopped
+    profiles:
+      - tools
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  stockchef-network:
+    driver: bridge

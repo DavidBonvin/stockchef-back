@@ -1,0 +1,9 @@
+# Ignorar archivos de Docker
+.env
+docker-compose.override.yml
+
+# Logs de Docker
+*.log
+
+# Datos temporales
+/docker/data/
