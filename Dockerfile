@@ -29,9 +29,9 @@ EXPOSE 8090
 ENV SPRING_PROFILES_ACTIVE=dev
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Comando de health check
+# Comando de health check (Railway compatible)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8090/api/health || exit 1
+    CMD curl -f http://localhost:8090/api/actuator/health || exit 1
 
 # Ejecutar la aplicación
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar target/stockchef-back-*.jar"]

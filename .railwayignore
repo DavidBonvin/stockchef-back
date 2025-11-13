@@ -1,0 +1,27 @@
+# Files to ignore during Railway deployment
+
+# Documentation
+*.md
+docs/
+HELP.md
+
+# Development files
+.env.local
+.env.example
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Test files (optional - remove if you want tests during build)
+src/test/
+
+# Local scripts
+start.ps1
+docker-manager.ps1
+docker-manager.sh
+
+# Docker files (Railway will use Nixpacks)
+docker-compose.yml
+Dockerfile.backup
