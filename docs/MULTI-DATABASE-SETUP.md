@@ -1,30 +1,30 @@
-# 📚 **Guía Completa de Conexión Multi-Base de Datos - StockChef Backend**
+# 📚 **Guide Complet de Connexion Multi-Base de Données - StockChef Backend**
 
-Esta guía te permitirá configurar y ejecutar el backend de StockChef con **H2**, **MySQL** o **PostgreSQL** según tus necesidades de desarrollo o producción.
+Cette guide vous permettra de configurer et d'exécuter le backend de StockChef avec **H2**, **MySQL** ou **PostgreSQL** selon vos besoins de développement ou de production.
 
-## 🎯 **Índice**
+## 🎯 **Sommaire**
 
-- [1. Resumen Ejecutivo](#1-resumen-ejecutivo)
-- [2. H2 Database (Desarrollo Rápido)](#2-h2-database-desarrollo-rápido)
-- [3. MySQL (Producción)](#3-mysql-producción)
-- [4. PostgreSQL (Producción)](#4-postgresql-producción)
-- [5. Configuración de Perfiles Existentes](#5-configuración-de-perfiles-existentes)
-- [6. Script de Inicio](#6-script-de-inicio)
-- [7. Troubleshooting](#7-troubleshooting)
+- [1. Résumé Exécutif](#1-résumé-exécutif)
+- [2. H2 Database (Développement Rapide)](#2-h2-database-développement-rapide)
+- [3. MySQL (Production)](#3-mysql-production)
+- [4. PostgreSQL (Production)](#4-postgresql-production)
+- [5. Configuration de Profils Existants](#5-configuration-de-profils-existants)
+- [6. Script de Démarrage](#6-script-de-démarrage)
+- [7. Dépannage](#7-dépannage)
 
 ---
 
-## 1. **Resumen Ejecutivo**
+## 1. **Résumé Exécutif**
 
-### ✅ **Versiones Compatibles Probadas**
+### ✅ **Versions Compatibles Testées**
 
-| Base de Datos | Versión | Tipo | Puerto | Uso Recomendado |
-|---------------|---------|------|--------|------------------|
-| **H2** | 2.3.232+ | En memoria | N/A | Desarrollo rápido |
-| **MySQL** | 8.4+ | Contenedor Docker | 3307 | Producción, persistencia |
-| **PostgreSQL** | 15+ | Contenedor Docker | 5432 | Producción avanzada |
+| Base de Données | Version | Type | Port | Utilisation Recommandée |
+|-----------------|---------|------|------|--------------------------|
+| **H2** | 2.3.232+ | En mémoire | N/A | Développement rapide |
+| **MySQL** | 8.4+ | Conteneur Docker | 3307 | Production, persistance |
+| **PostgreSQL** | 15+ | Conteneur Docker | 5432 | Production avancée |
 
-### 🛠️ **Requisitos del Sistema**
+### 🛠️ **Prérequis du Système**
 
 - **Java**: 24.0.1+ (JDK)
 - **Maven**: 3.9.11+
@@ -33,70 +33,70 @@ Esta guía te permitirá configurar y ejecutar el backend de StockChef con **H2*
 
 ---
 
-## 2. **H2 Database (Desarrollo Rápido)**
+## 2. **H2 Database (Développement Rapide)**
 
-### 📋 **Características**
-- ✅ **Sin configuración adicional**
-- ✅ **Inicio inmediato**
-- ✅ **Consola web integrada**
-- ⚠️ **Datos NO persistentes**
+### 📋 **Caractéristiques**
+- ✅ **Aucune configuration supplémentaire**
+- ✅ **Démarrage immédiat**
+- ✅ **Console web intégrée**
+- ⚠️ **Données NON persistantes**
 
-### 🚀 **Inicio Rápido**
+### 🚀 **Démarrage Rapide**
 
 ```powershell
-# Opción 1: Script interactivo
+# Option 1: Script interactif
 .\start.ps1
-# Seleccionar: 1
+# Sélectionner: 1
 
-# Opción 2: Directo
+# Option 2: Direct
 .\start.ps1 -Database h2
 
-# Opción 3: Maven directo
+# Option 3: Maven direct
 $env:SPRING_PROFILES_ACTIVE = "h2"; mvn spring-boot:run
 ```
 
 ### ⚙️ **Configuración (application-h2.properties)**
 
 ```properties
-# H2 Database - En Memoria
+# H2 Database - En Mémoire
 spring.datasource.url=jdbc:h2:mem:stockchef;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
 spring.datasource.username=sa
 spring.datasource.password=
 spring.datasource.driver-class-name=org.h2.Driver
 
-# JPA Configuration
+# Configuration JPA
 spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
 spring.jpa.show-sql=true
 
-# H2 Console Web
+# Console Web H2
 spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 ```
 
-### 🌐 **URLs de Acceso**
+### 🌐 **URLs d'Accès**
 
-| Servicio | URL | Credenciales |
-|----------|-----|--------------|
+| Service | URL | Identifiants |
+|---------|-----|---------------|
 | API Backend | http://localhost:8090/api | N/A |
-| H2 Console | http://localhost:8090/api/h2-console | User: `sa`, Pass: (vacío) |
-| JDBC URL | jdbc:h2:mem:stockchef | Para H2 Console |
+| H2 Console | http://localhost:8090/api/h2-console | Utilisateur: `sa`, Mot de passe: (vide) |
+| JDBC URL | jdbc:h2:mem:stockchef | Pour H2 Console |
 
 ---
 
-## 3. **MySQL (Producción)**
+## 3. **MySQL (Production)**
 
-### 📋 **Características**
-- ✅ **Datos persistentes**
-- ✅ **Alto rendimiento**
-- ✅ **Ampliamente soportado**
-- ⚠️ **Requiere Docker**
+### 📋 **Caractéristiques**
+- ✅ **Données persistantes**
+- ✅ **Haute performance**
+- ✅ **Largement supporté**
+- ⚠️ **Nécessite Docker**
 
-### 🐳 **Configuración Docker**
+### 🐳 **Configuration Docker**
 
-#### **Si NO tienes MySQL instalado:**
+#### **Si vous N'avez PAS MySQL installé:**
 ```bash
-# Crear contenedor MySQL
+# Créer conteneur MySQL
 docker run -d \
   --name stockchef-mysql \
   -p 3307:3306 \
@@ -107,59 +107,59 @@ docker run -d \
   mysql:8.4
 ```
 
-#### **Si YA tienes MySQL instalado/configurado:**
+#### **Si vous avez DÉJÀ MySQL installé/configuré:**
 
-**📍 Localiza tu configuración en:** `src/main/resources/application-mysql.properties`
+**📍 Localisez votre configuration dans:** `src/main/resources/application-mysql.properties`
 
 ```properties
-# ACTUALIZA ESTAS LÍNEAS CON TUS DATOS:
-spring.datasource.url=jdbc:mysql://localhost:TUPUERTO/TUBASEDEDATOS?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=TUUSUARIO
-spring.datasource.password=TUCONTRASEÑA
+# METTEZ À JOUR CES LIGNES AVEC VOS DONNÉES:
+spring.datasource.url=jdbc:mysql://localhost:VOTREPORT/VOTREBASEDEDONNEES?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=VOTREUTILISATEUR
+spring.datasource.password=VOTREMOTDEPASSE
 ```
 
-**🔧 Ejemplo con perfil existente:**
+**🔧 Exemple avec profil existant:**
 ```properties
-# Si tienes MySQL en puerto 3306 con usuario root
+# Si vous avez MySQL sur le port 3306 avec l'utilisateur root
 spring.datasource.url=jdbc:mysql://localhost:3306/stockchef_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 spring.datasource.username=root
-spring.datasource.password=TU_PASSWORD_AQUÍ
+spring.datasource.password=VOTRE_MOT_DE_PASSE_ICI
 ```
 
-### 🚀 **Inicio con MySQL**
+### 🚀 **Démarrage avec MySQL**
 
 ```powershell
-# Verificar que MySQL esté corriendo
+# Vérifier que MySQL fonctionne
 docker ps | findstr mysql
 
-# Iniciar backend
+# Démarrer backend
 .\start.ps1 -Database mysql
 ```
 
-### 📊 **Verificación de Conexión**
+### 📊 **Vérification de Connexion**
 
 ```bash
-# Conectar manualmente para verificar
+# Se connecter manuellement pour vérifier
 docker exec -it stockchef-mysql mysql -u root -pUserAdmin -e "SHOW DATABASES;"
 
-# Debe mostrar: stockchef_db
+# Doit afficher: stockchef_db
 ```
 
 ---
 
-## 4. **PostgreSQL (Producción)**
+## 4. **PostgreSQL (Production)**
 
-### 📋 **Características**
-- ✅ **Muy robusto**
-- ✅ **Estándares SQL estrictos**
-- ✅ **Tipos de datos avanzados**
-- ⚠️ **Requiere Docker**
+### 📋 **Caractéristiques**
+- ✅ **Très robuste**
+- ✅ **Standards SQL stricts**
+- ✅ **Types de données avancés**
+- ⚠️ **Nécessite Docker**
 
-### 🐳 **Configuración Docker**
+### 🐳 **Configuration Docker**
 
-#### **Si NO tienes PostgreSQL instalado:**
+#### **Si vous N'avez PAS PostgreSQL installé:**
 ```bash
-# Crear contenedor PostgreSQL
+# Créer conteneur PostgreSQL
 docker run -d \
   --name stockchef-postgres \
   -p 5432:5432 \
@@ -167,91 +167,91 @@ docker run -d \
   postgres:15
 ```
 
-**⚠️ IMPORTANTE**: Con esta configuración, el usuario es `postgres` (no personalizado).
+**⚠️ IMPORTANT**: Avec cette configuration, l'utilisateur est `postgres` (non personnalisé).
 
-#### **Si YA tienes PostgreSQL instalado/configurado:**
+#### **Si vous avez DÉJÀ PostgreSQL installé/configuré:**
 
-**📍 Localiza tu configuración en:** `src/main/resources/application-postgresql.properties`
+**📍 Localisez votre configuration dans:** `src/main/resources/application-postgresql.properties`
 
 ```properties
-# ACTUALIZA ESTAS LÍNEAS CON TUS DATOS:
-spring.datasource.url=jdbc:postgresql://localhost:TUPUERTO/TUBASEDEDATOS?sslmode=disable
-spring.datasource.username=TUUSUARIO
-spring.datasource.password=TUCONTRASEÑA
+# METTEZ À JOUR CES LIGNES AVEC VOS DONNÉES:
+spring.datasource.url=jdbc:postgresql://localhost:VOTREPORT/VOTREBASEDEDONNEES?sslmode=disable
+spring.datasource.username=VOTREUTILISATEUR
+spring.datasource.password=VOTREMOTDEPASSE
 ```
 
-**🔧 Ejemplo con perfil existente:**
+**🔧 Exemple avec profil existant:**
 ```properties
-# Si tienes PostgreSQL local con usuario personalizado
-spring.datasource.url=jdbc:postgresql://localhost:5432/mi_base_datos?sslmode=disable
-spring.datasource.username=mi_usuario
-spring.datasource.password=mi_contraseña
+# Si vous avez PostgreSQL local avec utilisateur personnalisé
+spring.datasource.url=jdbc:postgresql://localhost:5432/ma_base_de_donnees?sslmode=disable
+spring.datasource.username=mon_utilisateur
+spring.datasource.password=mon_mot_de_passe
 ```
 
-### 🚀 **Inicio con PostgreSQL**
+### 🚀 **Démarrage avec PostgreSQL**
 
 ```powershell
-# Verificar que PostgreSQL esté corriendo
+# Vérifier que PostgreSQL fonctionne
 docker ps | findstr postgres
 
-# Crear base de datos (si no existe)
+# Créer base de données (si elle n'existe pas)
 docker exec stockchef-postgres psql -U postgres -c "CREATE DATABASE stockchef_db;"
 
-# Iniciar backend
+# Démarrer backend
 .\start.ps1 -Database postgresql
 ```
 
-### 📊 **Verificación de Conexión**
+### 📊 **Vérification de Connexion**
 
 ```bash
-# Conectar manualmente para verificar
+# Se connecter manuellement pour vérifier
 docker exec stockchef-postgres psql -U postgres -c "\l"
 
-# Debe mostrar: stockchef_db
+# Doit afficher: stockchef_db
 ```
 
 ---
 
-## 5. **Configuración de Perfiles Existentes**
+## 5. **Configuration de Profils Existants**
 
-### 🎯 **Si ya tienes MySQL/PostgreSQL configurado**
+### 🎯 **Si vous avez déjà MySQL/PostgreSQL configuré**
 
-#### **Paso 1: Identifica tu configuración**
+#### **Étape 1: Identifiez votre configuration**
 
-**Para MySQL:**
+**Pour MySQL:**
 ```bash
-# Encuentra tu puerto y credenciales
+# Trouvez votre port et identifiants
 mysql -u root -p -e "SELECT @@port;"
 ```
 
-**Para PostgreSQL:**
+**Pour PostgreSQL:**
 ```bash
-# Encuentra tu puerto y credenciales  
+# Trouvez votre port et identifiants
 psql -U postgres -c "SHOW port;"
 ```
 
-#### **Paso 2: Actualiza el archivo correspondiente**
+#### **Étape 2: Mettez à jour le fichier correspondant**
 
-**📁 Ubicación de archivos:**
+**📁 Emplacement des fichiers:**
 - H2: `src/main/resources/application-h2.properties`
 - MySQL: `src/main/resources/application-mysql.properties`  
 - PostgreSQL: `src/main/resources/application-postgresql.properties`
 
-#### **Paso 3: Parámetros clave a modificar**
+#### **Étape 3: Paramètres clés à modifier**
 
 ```properties
-# MYSQL - Parámetros principales
-spring.datasource.url=jdbc:mysql://TU_HOST:TU_PUERTO/TU_BASE_DATOS?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=TU_USUARIO
-spring.datasource.password=TU_CONTRASEÑA
+# MYSQL - Paramètres principaux
+spring.datasource.url=jdbc:mysql://VOTRE_HOTE:VOTRE_PORT/VOTRE_BASE_DONNEES?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=VOTRE_UTILISATEUR
+spring.datasource.password=VOTRE_MOT_DE_PASSE
 
-# POSTGRESQL - Parámetros principales
-spring.datasource.url=jdbc:postgresql://TU_HOST:TU_PUERTO/TU_BASE_DATOS?sslmode=disable
-spring.datasource.username=TU_USUARIO  
-spring.datasource.password=TU_CONTRASEÑA
+# POSTGRESQL - Paramètres principaux
+spring.datasource.url=jdbc:postgresql://VOTRE_HOTE:VOTRE_PORT/VOTRE_BASE_DONNEES?sslmode=disable
+spring.datasource.username=VOTRE_UTILISATEUR  
+spring.datasource.password=VOTRE_MOT_DE_PASSE
 ```
 
-#### **Paso 4: Crear la base de datos (si no existe)**
+#### **Étape 4: Créer la base de données (si elle n'existe pas)**
 
 **MySQL:**
 ```sql
@@ -265,78 +265,78 @@ CREATE DATABASE stockchef_db;
 
 ---
 
-## 6. **Script de Inicio**
+## 6. **Script de Démarrage**
 
-### 🎮 **Uso del Script**
+### 🎮 **Utilisation du Script**
 
 ```powershell
-# Modo interactivo (recomendado)
+# Mode interactif (recommandé)
 .\start.ps1
 
-# Modo directo
+# Mode direct
 .\start.ps1 -Database h2          # H2
 .\start.ps1 -Database mysql       # MySQL
 .\start.ps1 -Database postgresql  # PostgreSQL
 ```
 
-### ⚙️ **Lo que hace automáticamente el script:**
+### ⚙️ **Ce que fait automatiquement le script:**
 
-1. ✅ **Verifica dependencias** (Docker containers)
-2. ✅ **Crea contenedores** si no existen
-3. ✅ **Configura JAVA_HOME** automáticamente
-4. ✅ **Selecciona perfil** correcto
-5. ✅ **Inicia backend** con la BD seleccionada
-6. ✅ **Inicializa datos** de prueba
+1. ✅ **Vérifie les dépendances** (conteneurs Docker)
+2. ✅ **Crée les conteneurs** s'ils n'existent pas
+3. ✅ **Configure JAVA_HOME** automatiquement
+4. ✅ **Sélectionne le profil** correct
+5. ✅ **Démarre le backend** avec la BD sélectionnée
+6. ✅ **Initialise les données** de test
 
 ---
 
-## 7. **Troubleshooting**
+## 7. **Dépannage**
 
-### 🚨 **Problemas Comunes**
+### 🚨 **Problèmes Courants**
 
-#### **Error: "JAVA_HOME not found"**
+#### **Erreur: "JAVA_HOME not found"**
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-24"
 ```
 
-#### **Error: "MySQL container not found"**
+#### **Erreur: "MySQL container not found"**
 ```bash
 docker run -d --name stockchef-mysql -p 3307:3306 -e MYSQL_ROOT_PASSWORD=UserAdmin -e MYSQL_DATABASE=stockchef_db mysql:8.4
 ```
 
-#### **Error: "PostgreSQL authentication failed"**
-- ✅ Verifica que uses usuario `postgres` (no customizado)
-- ✅ Verifica contraseña `UserAdmin`
-- ✅ Verifica que la base `stockchef_db` existe
+#### **Erreur: "PostgreSQL authentication failed"**
+- ✅ Vérifiez que vous utilisez l'utilisateur `postgres` (non personnalisé)
+- ✅ Vérifiez le mot de passe `UserAdmin`
+- ✅ Vérifiez que la base `stockchef_db` existe
 
-#### **Error: "Port already in use"**
+#### **Erreur: "Port already in use"**
 ```bash
-# Ver qué está usando el puerto
+# Voir ce qui utilise le port
 netstat -ano | findstr :3307  # MySQL
 netstat -ano | findstr :5432  # PostgreSQL
 ```
 
-### 🔧 **Comandos Útiles**
+### 🔧 **Commandes Utiles**
 
 ```bash
-# Ver contenedores
+# Voir les conteneurs
 docker ps
 
-# Parar todos los contenedores StockChef
+# Arrêter tous les conteneurs StockChef
 docker stop stockchef-mysql stockchef-postgres
 
-# Eliminar contenedores
+# Supprimer les conteneurs
 docker rm stockchef-mysql stockchef-postgres
 
-# Limpiar sistema Docker
+# Nettoyer le système Docker
 docker system prune -f
 ```
 
 ---
 
-## 🎉 **Testing Final**
+## 🎉 **Test Final**
 
-### 🧪 **Credenciales de Prueba (todas las BDs)**
+### 🧪 **Identifiants de Test (toutes les BDs)**
 
 ```json
 {
@@ -345,7 +345,7 @@ docker system prune -f
 }
 ```
 
-### 🌐 **Endpoint de Login**
+### 🌐 **Endpoint de Connexion**
 
 ```http
 POST http://localhost:8090/api/auth/login
@@ -357,7 +357,7 @@ Content-Type: application/json
 }
 ```
 
-### ✅ **Respuesta Esperada**
+### ✅ **Réponse Attendue**
 
 ```json
 {
@@ -371,18 +371,18 @@ Content-Type: application/json
 
 ---
 
-## 📋 **Resumen de Archivos**
+## 📋 **Résumé des Fichiers**
 
-| Archivo | Propósito |
-|---------|-----------|
-| `start.ps1` | Script de inicio interactivo |
-| `application.properties` | Configuración base |
-| `application-h2.properties` | Perfil H2 |
-| `application-mysql.properties` | Perfil MySQL | 
-| `application-postgresql.properties` | Perfil PostgreSQL |
+| Fichier | Objectif |
+|---------|----------|
+| `start.ps1` | Script de démarrage interactif |
+| `application.properties` | Configuration de base |
+| `application-h2.properties` | Profil H2 |
+| `application-mysql.properties` | Profil MySQL | 
+| `application-postgresql.properties` | Profil PostgreSQL |
 
 ---
 
-**🎯 ¡Con esta configuración tienes un sistema completamente funcional para desarrollo y producción!** 
+**🎯 Avec cette configuration vous avez un système complètement fonctionnel pour le développement et la production !** 
 
-El sistema detecta automáticamente las dependencias y te guía paso a paso para una conexión exitosa. ✨
+Le système détecte automatiquement les dépendances et vous guide étape par étape pour une connexion réussie. ✨

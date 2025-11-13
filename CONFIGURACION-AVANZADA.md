@@ -1,27 +1,27 @@
-# ⚙️ Configuración Avanzada - StockChef Backend
+# ⚙️ Configuration Avancée - StockChef Backend
 
-## 🗄️ Configuración Específica de Bases de Datos
+## 🗄️ Configuration Spécifique des Bases de Données
 
-### PostgreSQL Optimizado para StockChef
+### PostgreSQL Optimisé pour StockChef
 
-#### Componentes de Instalación Recomendados
+#### Composants d'Installation Recommandés
 ```
-✅ Instalación Mínima (Docker)
+✅ Installation Minimale (Docker)
    └── PostgreSQL (64 bit) v18.0-2
 
-✅ Instalación Desarrollo Local
+✅ Installation Développement Local
    ├── PostgreSQL (64 bit) v18.0-2
    ├── pgAgent (64 bit) v4.2.3-1
-   ├── pgJDBC v42.7.2-1 (opcional)
-   └── psqlODBC (64 bit) v13.02.0000-1 (opcional)
+   ├── pgJDBC v42.7.2-1 (optionnel)
+   └── psqlODBC (64 bit) v13.02.0000-1 (optionnel)
 
-🎯 Instalación con Datos Geográficos
-   └── + PostGIS 3.6 Bundle para ubicaciones de inventario
+🎯 Installation avec Données Géographiques
+   └── + PostGIS 3.6 Bundle pour localisations d'inventaire
 ```
 
-#### Configuración Óptima postgresql.conf
+#### Configuration Optimale postgresql.conf
 ```ini
-# Configuración para StockChef (ajustar según RAM disponible)
+# Configuration pour StockChef (ajuster selon RAM disponible)
 shared_buffers = 256MB
 effective_cache_size = 1GB
 maintenance_work_mem = 64MB
@@ -29,14 +29,14 @@ wal_buffers = 16MB
 checkpoint_completion_target = 0.9
 random_page_cost = 1.1
 
-# Para desarrollo
+# Pour développement
 log_statement = 'all'
 log_duration = on
 ```
 
-#### Configuración de Pool de Conexiones para PostgreSQL
+#### Configuration de Pool de Connexions pour PostgreSQL
 ```properties
-# application-postgres.properties optimizado
+# application-postgres.properties optimisé
 spring.datasource.hikari.maximum-pool-size=25
 spring.datasource.hikari.minimum-idle=5
 spring.datasource.hikari.idle-timeout=300000
@@ -45,9 +45,9 @@ spring.datasource.hikari.connection-timeout=30000
 spring.datasource.hikari.validation-timeout=5000
 ```
 
-### MySQL Optimizado para StockChef
+### MySQL Optimisé pour StockChef
 
-#### Configuración my.cnf Recomendada
+#### Configuration my.cnf Recommandée
 ```ini
 [mysqld]
 # Configuración básica para StockChef

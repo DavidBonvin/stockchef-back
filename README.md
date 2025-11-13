@@ -6,124 +6,124 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-orange?style=flat&logo=mysql)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue?style=flat&logo=postgresql)
 
-Backend REST API para StockChef - Sistema de gestión de inventario de cocina profesional con soporte multi-base de datos y containerización Docker completa.
+API REST Backend pour StockChef - Système de gestion d'inventaire de cuisine professionnel avec support multi-base de données et conteneurisation Docker complète.
 
-## 📋 Tabla de Contenidos
+## 📋 Table des Matières
 
-- [🎯 Características](#-características)
-- [🛠️ Requisitos](#️-requisitos)
-- [🚀 Instalación y Configuración](#-instalación-y-configuración)
-- [🐳 Uso con Docker](#-uso-con-docker)
-- [🌐 Servicios y Puertos](#-servicios-y-puertos)
-- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
-- [⚙️ Configuración](#️-configuración)
-- [🧪 Testing](#-testing)
+- [🎯 Fonctionnalités](#-fonctionnalités)
+- [🛠️ Prérequis](#️-prérequis)
+- [🚀 Installation et Configuration](#-installation-et-configuration)
+- [🐳 Utilisation avec Docker](#-utilisation-avec-docker)
+- [🌐 Services et Ports](#-services-et-ports)
+- [📁 Structure du Projet](#-structure-du-projet)
+- [⚙️ Configuration](#️-configuration)
+- [🧪 Tests](#-tests)
 - [📚 API Endpoints](#-api-endpoints)
-- [🔧 Desarrollo](#-desarrollo)
-- [🚀 Despliegue](#-despliegue)
-- [❓ Solución de Problemas](#-solución-de-problemas)
+- [🔧 Développement](#-développement)
+- [🚀 Déploiement](#-déploiement)
+- [❓ Résolution de Problèmes](#-résolution-de-problèmes)
 
-## 🎯 Características
+## 🎯 Fonctionnalités
 
-- ✅ **Multi-Base de Datos**: Soporte para MySQL y PostgreSQL con cambio dinámico
-- ✅ **Containerización Completa**: Docker Compose con todos los servicios
-- ✅ **Scripts de Gestión**: Herramientas automatizadas para Windows y Linux
-- ✅ **Herramientas de Admin**: phpMyAdmin y pgAdmin incluidos
-- ✅ **Health Checks**: Monitoreo automático de servicios
-- ✅ **Configuración por Perfiles**: Desarrollo, testing y producción
-- ✅ **Seguridad**: Spring Security con JWT preparado
-- ✅ **Arquitectura Profesional**: Estructura de packages empresarial
+- ✅ **Multi-Base de Données**: Support pour MySQL et PostgreSQL avec changement dynamique
+- ✅ **Conteneurisation Complète**: Docker Compose avec tous les services
+- ✅ **Scripts de Gestion**: Outils automatisés pour Windows et Linux
+- ✅ **Outils d'Administration**: phpMyAdmin et pgAdmin inclus
+- ✅ **Health Checks**: Surveillance automatique des services
+- ✅ **Configuration par Profils**: Développement, test et production
+- ✅ **Sécurité**: Spring Security avec JWT préparé
+- ✅ **Architecture Professionnelle**: Structure de packages d'entreprise
 
-## 🛠️ Requisitos
+## 🛠️ Prérequis
 
-### Requisitos Mínimos
-- **Docker Desktop** 4.0+ con Docker Compose v2.0+
-- **Git** para clonar el repositorio
-- **4GB RAM** mínimo disponible para Docker
-- **Puertos disponibles**: 8090, 3307, 5433, 8080, 8081
+### Prérequis Minimums
+- **Docker Desktop** 4.0+ avec Docker Compose v2.0+
+- **Git** pour cloner le dépôt
+- **4GB RAM** minimum disponible pour Docker
+- **Ports disponibles**: 8090, 3307, 5433, 8080, 8081
 
-### Requisitos para Desarrollo Local (Opcional)
-- **Java JDK** 21 o 24
+### Prérequis pour Développement Local (Optionnel)
+- **Java JDK** 21 ou 24
 - **Maven** 3.9+
-- **MySQL** 8.4+ (si no usas Docker)
-- **PostgreSQL** 18+ (si no usas Docker) - [Ver guía de instalación](#-instalación-postgresql-para-desarrollo-local)
+- **MySQL** 8.4+ (si vous n'utilisez pas Docker)
+- **PostgreSQL** 18+ (si vous n'utilisez pas Docker) - [Voir guide d'installation](#-installation-postgresql-pour-développement-local)
 
-## 🚀 Instalación y Configuración
+## 🚀 Installation et Configuration
 
-### 1. Clonar el Repositorio
+### 1. Cloner le Dépôt
 ```bash
 git clone https://github.com/DavidBonvin/stockchef-back.git
 cd stockchef-back
 ```
 
-### 2. Verificar Docker
+### 2. Vérifier Docker
 ```bash
-# Verificar que Docker está ejecutándose
+# Vérifier que Docker est en cours d'exécution
 docker --version
 docker-compose --version
 
-# Debe mostrar versiones similares a:
+# Doit afficher des versions similaires à:
 # Docker version 27.4.0
 # Docker Compose version v2.30.3
 ```
 
-### 3. Configurar Variables de Entorno
+### 3. Configurer les Variables d'Environnement
 ```bash
-# Copiar archivo de configuración
+# Copier le fichier de configuration
 cp .env.example .env
 
-# Editar configuración (opcional)
-# DATABASE_TYPE=mysql  # o postgres
+# Éditer la configuration (optionnel)
+# DATABASE_TYPE=mysql  # ou postgres
 ```
 
-### 📥 Instalación PostgreSQL para Desarrollo Local
+### 📥 Installation PostgreSQL pour Développement Local
 
-Si planeas desarrollar sin Docker y usar PostgreSQL local, sigue esta guía de instalación:
+Si vous prévoyez de développer sans Docker et utiliser PostgreSQL local, suivez ce guide d'installation:
 
-#### Componentes Recomendados para Instalar
+#### Composants Recommandés à Installer
 
-##### ✅ **OBLIGATORIOS - Marcar Siempre**
-- ✅ **PostgreSQL (64 bit) v18.0-2** - El servidor principal de base de datos
-- ✅ **pgAgent (64 bit) for PostgreSQL 18 v4.2.3-1** - Para tareas programadas y mantenimiento
+##### ✅ **OBLIGATOIRES - Toujours Cocher**
+- ✅ **PostgreSQL (64 bit) v18.0-2** - Le serveur de base de données principal
+- ✅ **pgAgent (64 bit) for PostgreSQL 18 v4.2.3-1** - Pour les tâches programmées et la maintenance
 
-##### ✅ **RECOMENDADOS - Muy Útiles**
-- ✅ **pgJDBC v42.7.2-1** - Driver JDBC para Java/Spring Boot (backup local)
-- ✅ **psqlODBC (64 bit) v13.02.0000-1** - Para conectividad con herramientas externas
+##### ✅ **RECOMMANDÉS - Très Utiles**
+- ✅ **pgJDBC v42.7.2-1** - Driver JDBC pour Java/Spring Boot (sauvegarde locale)
+- ✅ **psqlODBC (64 bit) v13.02.0000-1** - Pour la connectivité avec les outils externes
 
-##### 🎯 **OPCIONALES - Según Necesidad**
-- 🎯 **PostGIS 3.6 Bundle for PostgreSQL 18** - Solo si manejarás datos geográficos/ubicaciones
+##### 🎯 **OPTIONNELS - Selon les Besoins**
+- 🎯 **PostGIS 3.6 Bundle for PostgreSQL 18** - Seulement si vous gérez des données géographiques/localisations
 
-##### ❌ **NO NECESARIOS para StockChef**
-- ❌ **Npgsql** - Driver para .NET (no Java)
-- ❌ **psqlODBC (32 bit)** - Versión 32-bit innecesaria
-- ❌ **PostgreSQL versiones anteriores** (v13-v17) - Ya tienes v18
-- ❌ **Migration Toolkit** - Para migraciones empresariales complejas
-- ❌ **Enterprise Manager** - Herramientas enterprise de pago
-- ❌ **pgBouncer** - Pool de conexiones (Docker ya lo maneja)
-- ❌ **PEM-HTTPD** - Servidor web para Enterprise Manager
+##### ❌ **NON NÉCESSAIRES pour StockChef**
+- ❌ **Npgsql** - Driver pour .NET (pas Java)
+- ❌ **psqlODBC (32 bit)** - Version 32-bit inutile
+- ❌ **PostgreSQL versions antérieures** (v13-v17) - Vous avez déjà v18
+- ❌ **Migration Toolkit** - Pour les migrations d'entreprise complexes
+- ❌ **Enterprise Manager** - Outils d'entreprise payants
+- ❌ **pgBouncer** - Pool de connexions (Docker le gère déjà)
+- ❌ **PEM-HTTPD** - Serveur web pour Enterprise Manager
 
-#### Instalación Mínima para Docker
+#### Installation Minimale pour Docker
 ```
 ✅ Database Server
    └── PostgreSQL (64 bit) v18.0-2
 ```
 
-> 💡 **Nota**: Si usas Docker principalmente, solo necesitas PostgreSQL 18. Los drivers y herramientas los maneja Docker automáticamente.
+> 💡 **Note**: Si vous utilisez principalement Docker, vous n'avez besoin que de PostgreSQL 18. Les drivers et outils sont gérés automatiquement par Docker.
 
-#### Verificar Instalación
+#### Vérifier l'Installation
 ```bash
-# Verificar versión
+# Vérifier la version
 psql --version
 
-# Crear base de datos para desarrollo
+# Créer une base de données pour le développement
 createdb -U postgres stockchef_db
 ```
 
-## 🐳 Uso con Docker
+## 🐳 Utilisation avec Docker
 
-### Inicio Rápido
+### Démarrage Rapide
 
-#### Con MySQL (Recomendado)
+#### Avec MySQL (Recommandé)
 ```powershell
 # Windows PowerShell
 .\docker-manager.ps1 up mysql
@@ -134,7 +134,7 @@ createdb -U postgres stockchef_db
 ./docker-manager.sh up mysql
 ```
 
-#### Con PostgreSQL
+#### Avec PostgreSQL
 ```powershell
 # Windows PowerShell
 .\docker-manager.ps1 up postgres
@@ -145,104 +145,104 @@ createdb -U postgres stockchef_db
 ./docker-manager.sh up postgres
 ```
 
-### Comandos de Gestión
+### Commandes de Gestion
 
-| Comando | Descripción |
+| Commande | Description |
 |---------|-------------|
-| `.\docker-manager.ps1 up mysql` | Iniciar con MySQL |
-| `.\docker-manager.ps1 up postgres` | Iniciar con PostgreSQL |
-| `.\docker-manager.ps1 down` | Parar todos los servicios |
-| `.\docker-manager.ps1 status` | Ver estado de servicios |
-| `.\docker-manager.ps1 logs backend` | Ver logs del backend |
-| `.\docker-manager.ps1 tools` | Iniciar herramientas de admin |
-| `.\docker-manager.ps1 clean` | Limpiar datos (⚠️ destructivo) |
-| `.\docker-manager.ps1 build` | Reconstruir imagen |
-| `.\docker-manager.ps1 help` | Mostrar ayuda completa |
+| `.\docker-manager.ps1 up mysql` | Démarrer avec MySQL |
+| `.\docker-manager.ps1 up postgres` | Démarrer avec PostgreSQL |
+| `.\docker-manager.ps1 down` | Arrêter tous les services |
+| `.\docker-manager.ps1 status` | Voir l'état des services |
+| `.\docker-manager.ps1 logs backend` | Voir les logs du backend |
+| `.\docker-manager.ps1 tools` | Démarrer les outils d'administration |
+| `.\docker-manager.ps1 clean` | Nettoyer les données (⚠️ destructif) |
+| `.\docker-manager.ps1 build` | Reconstruire l'image |
+| `.\docker-manager.ps1 help` | Afficher l'aide complète |
 
-### Verificar Funcionamiento
+### Vérifier le Fonctionnement
 ```bash
-# Probar endpoint de salud
+# Tester l'endpoint de santé
 curl http://localhost:8090/api/health
 
-# Respuesta esperada:
-# {"service":"stockchef-back","message":"StockChef Backend está funcionando correctamente","version":"0.0.1-SNAPSHOT","status":"UP","timestamp":"..."}
+# Réponse attendue:
+# {"service":"stockchef-back","message":"StockChef Backend fonctionne correctement","version":"0.0.1-SNAPSHOT","status":"UP","timestamp":"..."}
 ```
 
-## 🌐 Servicios y Puertos
+## 🌐 Services et Ports
 
-| Servicio | URL/Host | Puerto | Credenciales | Descripción |
+| Service | URL/Host | Port | Identifiants | Description |
 |----------|----------|--------|--------------|-------------|
-| **Backend API** | http://localhost:8090 | 8090 | - | API REST principal |
-| **MySQL** | localhost:3307 | 3307 | `root` / `UserAdmin` | Base de datos MySQL |
-| **PostgreSQL** | localhost:5433 | 5433 | `postgres` / `UserAdmin` | Base de datos PostgreSQL |
-| **phpMyAdmin** | http://localhost:8080 | 8080 | `root` / `UserAdmin` | Admin web para MySQL |
-| **pgAdmin** | http://localhost:8081 | 8081 | `admin@stockchef.com` / `UserAdmin` | Admin web para PostgreSQL |
+| **Backend API** | http://localhost:8090 | 8090 | - | API REST principale |
+| **MySQL** | localhost:3307 | 3307 | `root` / `UserAdmin` | Base de données MySQL |
+| **PostgreSQL** | localhost:5433 | 5433 | `postgres` / `UserAdmin` | Base de données PostgreSQL |
+| **phpMyAdmin** | http://localhost:8080 | 8080 | `root` / `UserAdmin` | Administration web pour MySQL |
+| **pgAdmin** | http://localhost:8081 | 8081 | `admin@stockchef.com` / `UserAdmin` | Administration web pour PostgreSQL |
 
-> 💡 **Herramientas PostgreSQL**: Si instalaste PostgreSQL local con pgAgent, también tienes acceso a `psql` desde línea de comandos y pueden conectarse herramientas como pgAdmin desktop.
+> 💡 **Outils PostgreSQL**: Si vous avez installé PostgreSQL local avec pgAgent, vous avez aussi accès à `psql` depuis la ligne de commande et pouvez connecter des outils comme pgAdmin desktop.
 
-### Endpoints API Principales
+### Endpoints API Principaux
 
-| Endpoint | Método | Descripción |
+| Endpoint | Méthode | Description |
 |----------|--------|-------------|
-| `/api/health` | GET | Health check del servicio |
-| `/api/health/status` | GET | Estado detallado con info de BD |
+| `/api/health` | GET | Health check du service |
+| `/api/health/status` | GET | État détaillé avec info de BD |
 
-## 📁 Estructura del Proyecto
+## 📁 Structure du Projet
 
 ```
 📦 stockchef-back/
 ├── 📁 .mvn/                          # Maven wrapper
-├── 📁 docker/                        # Configuración Docker
+├── 📁 docker/                        # Configuration Docker
 │   ├── 📁 mysql/
-│   │   └── init.sql                  # Script inicialización MySQL
+│   │   └── init.sql                  # Script d'initialisation MySQL
 │   └── 📁 postgres/
-│       └── init.sql                  # Script inicialización PostgreSQL
+│       └── init.sql                  # Script d'initialisation PostgreSQL
 ├── 📁 src/
 │   ├── 📁 main/
 │   │   ├── 📁 java/com/stockchef/stockchefback/
-│   │   │   ├── 📁 config/            # Configuraciones Spring
-│   │   │   ├── 📁 controller/        # Controladores REST
+│   │   │   ├── 📁 config/            # Configurations Spring
+│   │   │   ├── 📁 controller/        # Contrôleurs REST
 │   │   │   ├── 📁 dto/              # Data Transfer Objects
-│   │   │   ├── 📁 exception/        # Manejo de excepciones
-│   │   │   ├── 📁 model/            # Entidades JPA
-│   │   │   ├── 📁 repository/       # Repositorios de datos
-│   │   │   ├── 📁 security/         # Configuración seguridad
-│   │   │   ├── 📁 service/          # Lógica de negocio
+│   │   │   ├── 📁 exception/        # Gestion des exceptions
+│   │   │   ├── 📁 model/            # Entités JPA
+│   │   │   ├── 📁 repository/       # Dépôts de données
+│   │   │   ├── 📁 security/         # Configuration sécurité
+│   │   │   ├── 📁 service/          # Logique métier
 │   │   │   └── StockchefBackApplication.java
 │   │   └── 📁 resources/
-│   │       ├── application.properties              # Config principal
-│   │       ├── application-dev.properties          # Desarrollo sin BD
-│   │       ├── application-mysql.properties        # Config MySQL local
-│   │       ├── application-postgres.properties     # Config PostgreSQL local
-│   │       ├── application-docker-mysql.properties # Config MySQL Docker
-│   │       └── application-docker-postgres.properties # Config PostgreSQL Docker
-│   └── 📁 test/                     # Tests unitarios
-├── 🐳 Dockerfile                     # Imagen Docker del backend
-├── 🐳 docker-compose.yml             # Orquestación de servicios
-├── 🔧 docker-manager.ps1             # Script gestión Windows
-├── 🔧 docker-manager.sh              # Script gestión Linux/Mac
-├── ⚙️ .env                           # Variables de entorno
-├── ⚙️ .env.example                   # Ejemplo de configuración
-├── 📄 pom.xml                        # Configuración Maven
-├── 📚 README-Docker.md               # Documentación Docker detallada
-└── 📚 PROYECTO-COMPLETADO.md         # Resumen del proyecto
+│   │       ├── application.properties              # Configuration principale
+│   │       ├── application-dev.properties          # Développement sans BD
+│   │       ├── application-mysql.properties        # Configuration MySQL local
+│   │       ├── application-postgres.properties     # Configuration PostgreSQL local
+│   │       ├── application-docker-mysql.properties # Configuration MySQL Docker
+│   │       └── application-docker-postgres.properties # Configuration PostgreSQL Docker
+│   └── 📁 test/                     # Tests unitaires
+├── 🐳 Dockerfile                     # Image Docker du backend
+├── 🐳 docker-compose.yml             # Orchestration des services
+├── 🔧 docker-manager.ps1             # Script de gestion Windows
+├── 🔧 docker-manager.sh              # Script de gestion Linux/Mac
+├── ⚙️ .env                           # Variables d'environnement
+├── ⚙️ .env.example                   # Exemple de configuration
+├── 📄 pom.xml                        # Configuration Maven
+├── 📚 README-Docker.md               # Documentation Docker détaillée
+└── 📚 PROJET-TERMINE.md              # Résumé du projet
 ```
 
-## ⚙️ Configuración
+## ⚙️ Configuration
 
-### Variables de Entorno (.env)
+### Variables d'Environnement (.env)
 
 ```bash
-# Tipo de base de datos (mysql o postgres)
+# Type de base de données (mysql ou postgres)
 DATABASE_TYPE=mysql
 
-# Perfil Spring activo
+# Profil Spring actif
 SPRING_PROFILES_ACTIVE=mysql
 
-# Configuración JVM
+# Configuration JVM
 JAVA_OPTS=-Xmx1024m -Xms512m
 
-# Configuración MySQL
+# Configuration MySQL
 MYSQL_ROOT_PASSWORD=UserAdmin
 MYSQL_DATABASE=stockchef_db
 MYSQL_USER=stockchef_user

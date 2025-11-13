@@ -1,53 +1,53 @@
-# 🚀 **Quick Start - StockChef Multi-Database**
+# 🚀 **Démarrage Rapide - StockChef Multi-Database**
 
-## ⚡ **Inicio Inmediato**
+## ⚡ **Démarrage Immédiat**
 
 ```powershell
-# 1. Ejecuta el script
+# 1. Exécutez le script
 .\start.ps1
 
-# 2. Selecciona base de datos:
-#    1 = H2 (rápido, sin Docker)
-#    2 = MySQL (persistente, requiere Docker)  
-#    3 = PostgreSQL (robusto, requiere Docker)
+# 2. Sélectionnez la base de données:
+#    1 = H2 (rapide, sans Docker)
+#    2 = MySQL (persistant, nécessite Docker)  
+#    3 = PostgreSQL (robuste, nécessite Docker)
 
-# 3. ¡Listo! Backend en http://localhost:8090/api
+# 3. Prêt! Backend sur http://localhost:8090/api
 ```
 
-## 🔧 **Si ya tienes MySQL/PostgreSQL**
+## 🔧 **Si vous avez déjà MySQL/PostgreSQL**
 
-### **MySQL existente:**
-1. Edita: `src/main/resources/application-mysql.properties`
-2. Cambia estas líneas:
+### **MySQL existant:**
+1. Éditez: `src/main/resources/application-mysql.properties`
+2. Changez ces lignes:
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:TU_PUERTO/TU_BD?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-   spring.datasource.username=TU_USUARIO
-   spring.datasource.password=TU_CONTRASEÑA
+   spring.datasource.url=jdbc:mysql://localhost:VOTRE_PORT/VOTRE_BD?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+   spring.datasource.username=VOTRE_UTILISATEUR
+   spring.datasource.password=VOTRE_MOT_DE_PASSE
    ```
 
-### **PostgreSQL existente:**
-1. Edita: `src/main/resources/application-postgresql.properties`
-2. Cambia estas líneas:
+### **PostgreSQL existant:**
+1. Éditez: `src/main/resources/application-postgresql.properties`
+2. Changez ces lignes:
    ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:TU_PUERTO/TU_BD?sslmode=disable
-   spring.datasource.username=TU_USUARIO
-   spring.datasource.password=TU_CONTRASEÑA
+   spring.datasource.url=jdbc:postgresql://localhost:VOTRE_PORT/VOTRE_BD?sslmode=disable
+   spring.datasource.username=VOTRE_UTILISATEUR
+   spring.datasource.password=VOTRE_MOT_DE_PASSE
    ```
 
-## 🧪 **Testing**
+## 🧪 **Tests**
 
 ```bash
-# Endpoint de prueba
+# Endpoint de test
 POST http://localhost:8090/api/auth/login
 
-# Credenciales
+# Identifiants
 {
   "email": "developer@stockchef.com",
   "password": "devpass123"
 }
 ```
 
-## 📋 **Versiones Compatibles**
+## 📋 **Versions Compatibles**
 
 | BD | Versión | Puerto |
 |----|---------|--------|

@@ -1,10 +1,10 @@
 # =====================================================================================
-# GUÍA DE TESTING END-TO-END Y CONFIGURACIÓN POSTGRESQL PARA STOCKCHEF
+# GUIDE DE TESTING END-TO-END ET CONFIGURATION POSTGRESQL POUR STOCKCHEF
 # =====================================================================================
 
-## 🎯 **Estado Actual del Sistema**
+## 🎯 **État Actuel du Système**
 
-### ✅ **Tests End-to-End Completados**
+### ✅ **Tests End-to-End Complétés**
 ```
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 🧪 shouldCompleteFullAuthenticationFlowForDeveloper    ✅ PASSED
@@ -16,50 +16,50 @@ Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 🔍 shouldExtractAllCustomClaimsCorrectly              ✅ PASSED
 ```
 
-### 🔐 **Sistema de Autenticación Verificado**
-- ✅ JWT Token generation y validation
-- ✅ Todos los roles (DEVELOPER, ADMIN, CHEF, EMPLOYEE)
-- ✅ Validación de credenciales
-- ✅ Manejo de usuarios inactivos
-- ✅ Validación de formato de request
-- ✅ Extracción de claims personalizados
-- ✅ Autenticaciones múltiples consecutivas
+### 🔐 **Système d'Authentification Vérifié**
+- ✅ Génération et validation JWT Token
+- ✅ Tous les rôles (DEVELOPER, ADMIN, CHEF, EMPLOYEE)
+- ✅ Validation des identifiants
+- ✅ Gestion des utilisateurs inactifs
+- ✅ Validation du format de requête
+- ✅ Extraction des claims personnalisés
+- ✅ Authentifications multiples consécutives
 
-## 🗃️ **Configuración PostgreSQL**
+## 🗃️ **Configuration PostgreSQL**
 
-### 📋 **Paso 1: Configurar PostgreSQL**
+### 📋 **Étape 1: Configurer PostgreSQL**
 
-**Ejecutar script de configuración:**
+**Exécuter le script de configuration:**
 ```sql
--- Archivo: docs/database/setup-postgres.sql
--- Ejecutar en PostgreSQL como administrador:
+-- Fichier: docs/database/setup-postgres.sql
+-- Exécuter dans PostgreSQL en tant qu'administrateur:
 psql -U postgres -f docs/database/setup-postgres.sql
 ```
 
-### 🚀 **Paso 2: Ejecutar con PostgreSQL**
+### 🚀 **Étape 2: Exécuter avec PostgreSQL**
 
-**Comandos para testing:**
+**Commandes pour le testing:**
 ```bash
-# Ejecutar con perfil PostgreSQL
+# Exécuter avec profil PostgreSQL
 mvn spring-boot:run -Dspring.profiles.active=postgres
 
-# O configurar variable de entorno
+# Ou configurer variable d'environnement
 set SPRING_PROFILES_ACTIVE=postgres
 mvn spring-boot:run
 ```
 
-### 🧪 **Paso 3: Verificar Datos Iniciales**
+### 🧪 **Étape 3: Vérifier les Données Initiales**
 
-**Usuarios creados automáticamente:**
+**Utilisateurs créés automatiquement:**
 - 👑 `developer@stockchef.com` / `devpass123` (ROLE_DEVELOPER)
 - 🛡️ `admin@stockchef.com` / `adminpass123` (ROLE_ADMIN) 
 - 👨‍🍳 `chef@stockchef.com` / `chefpass123` (ROLE_CHEF)
 - 👷 `employee@stockchef.com` / `emppass123` (ROLE_EMPLOYEE)
 - ⚠️ `inactive@stockchef.com` / `inactivepass123` (ROLE_EMPLOYEE - INACTIVE)
 
-### 📡 **Endpoints de Testing**
+### 📡 **Endpoints de Test**
 
-**1. Login Developer (Super-Admin):**
+**1. Connexion Developer (Super-Admin):**
 ```bash
 curl -X POST http://localhost:8090/api/auth/login \
   -H "Content-Type: application/json" \
@@ -69,7 +69,7 @@ curl -X POST http://localhost:8090/api/auth/login \
   }'
 ```
 
-**Respuesta esperada:**
+**Réponse attendue:**
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
@@ -80,7 +80,7 @@ curl -X POST http://localhost:8090/api/auth/login \
 }
 ```
 
-**2. Login Admin:**
+**2. Connexion Admin:**
 ```bash
 curl -X POST http://localhost:8090/api/auth/login \
   -H "Content-Type: application/json" \
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8090/api/auth/login \
   }'
 ```
 
-**3. Test Invalid Credentials:**
+**3. Test Identifiants Invalides:**
 ```bash
 curl -X POST http://localhost:8090/api/auth/login \
   -H "Content-Type: application/json" \
@@ -100,140 +100,140 @@ curl -X POST http://localhost:8090/api/auth/login \
   }'
 ```
 
-## 🔧 **Configuración de Perfiles**
+## 🔧 **Configuration des Profils**
 
-### 🏠 **Desarrollo Local (H2)**
+### 🏠 **Développement Local (H2)**
 ```properties
 spring.profiles.active=dev
-# Automáticamente usa H2 en memoria para desarrollo rápido
+# Utilise automatiquement H2 en mémoire pour développement rapide
 ```
 
-### 🗃️ **Desarrollo con PostgreSQL**
+### 🗃️ **Développement avec PostgreSQL**
 ```properties
 spring.profiles.active=postgres
-# Usa PostgreSQL con datos iniciales
+# Utilise PostgreSQL avec données initiales
 ```
 
 ### 🧪 **Testing**
 ```properties
 spring.profiles.active=test
-# Usa H2 en memoria para tests unitarios y de integración
+# Utilise H2 en mémoire pour tests unitaires et d'intégration
 ```
 
-## 📊 **Verificación de Base de Datos**
+## 📊 **Vérification de Base de Données**
 
-### 🔍 **Consultas de Verificación PostgreSQL**
+### 🔍 **Requêtes de Vérification PostgreSQL**
 ```sql
--- Verificar usuarios creados
+-- Vérifier les utilisateurs créés
 SELECT id, email, first_name, last_name, role, is_active 
 FROM users 
 ORDER BY role;
 
--- Verificar contraseñas encriptadas
+-- Vérifier les mots de passe cryptés
 SELECT email, password, role 
 FROM users 
 WHERE email = 'developer@stockchef.com';
 
--- Contar usuarios por rol
+-- Compter les utilisateurs par rôle
 SELECT role, COUNT(*) as total 
 FROM users 
 GROUP BY role;
 ```
 
-### 🏠 **H2 Console (perfil dev)**
+### 🏠 **Console H2 (profil dev)**
 - URL: http://localhost:8090/api/h2-console
 - JDBC URL: jdbc:h2:mem:testdb
 - User: sa
-- Password: (vacío)
+- Password: (vide)
 
-## 🎯 **Próximos Pasos**
+## 🎯 **Prochaines Étapes**
 
-### 🔒 **1. Implementar JWT Security Filter Chain**
+### 🔒 **1. Implémenter JWT Security Filter Chain**
 - JwtAuthenticationFilter
-- Protección de endpoints
-- Manejo de roles y permisos
+- Protection des endpoints
+- Gestion des rôles et permissions
 
-### 🛡️ **2. Endpoints Protegidos**
-- Crear endpoints que requieran autenticación
-- Implementar autorización por roles
-- Middleware de validación JWT
+### 🛡️ **2. Endpoints Protégés**
+- Créer des endpoints nécessitant une authentification
+- Implémenter l'autorisation par rôles
+- Middleware de validation JWT
 
-### 🧪 **3. Tests de Autorización**
-- Tests de acceso por roles
-- Verificación de JWT en headers
-- Tests de endpoints protegidos
+### 🧪 **3. Tests d'Autorisation**
+- Tests d'accès par rôles
+- Vérification JWT dans les headers
+- Tests d'endpoints protégés
 
-### 📱 **4. Frontend Integration**
-- Configurar CORS
-- Manejo de tokens en frontend
-- Refresh token strategy
+### 📱 **4. Intégration Frontend**
+- Configurer CORS
+- Gestion des tokens en frontend
+- Stratégie de refresh token
 
-## ⚡ **Comandos Rápidos**
+## ⚡ **Commandes Rapides**
 
-### 🚀 **Testing Completo**
+### 🚀 **Test Complet**
 ```bash
-# Tests unitarios y de integración
+# Tests unitaires et d'intégration
 mvn test
 
-# Tests específicos de autenticación
+# Tests spécifiques d'authentification
 mvn test -Dtest=AuthenticationIntegrationTest
 
-# Ejecutar con PostgreSQL
+# Exécuter avec PostgreSQL
 mvn spring-boot:run -Dspring.profiles.active=postgres
 
-# Verificar logs detallados
+# Vérifier logs détaillés
 mvn spring-boot:run -Dspring.profiles.active=postgres -Dlogging.level.com.stockchef=DEBUG
 ```
 
-### 🔧 **Desarrollo**
+### 🔧 **Développement**
 ```bash
-# Desarrollo con H2 (por defecto)
+# Développement avec H2 (par défaut)
 mvn spring-boot:run
 
-# Desarrollo con PostgreSQL + datos iniciales
+# Développement avec PostgreSQL + données initiales
 mvn spring-boot:run -Dspring.profiles.active=postgres
 
-# Reset de base de datos PostgreSQL
+# Reset de base de données PostgreSQL
 psql -U postgres -c "DROP DATABASE IF EXISTS stockchef_db;"
 psql -U postgres -f docs/database/setup-postgres.sql
 ```
 
-## 🎉 **Logros Completados**
+## 🎉 **Réalisations Complétées**
 
-✅ **Autenticación JWT Completa con TDD**
-- UserRole enum con ROLE_DEVELOPER
-- User entity con UserDetails implementation
-- UserRepository con métodos customizados
-- JwtService con generación y validación completa
-- AuthController con endpoint de login
-- SecurityConfig con PasswordEncoder
-- DTOs de request/response validados
+✅ **Authentification JWT Complète avec TDD**
+- UserRole enum avec ROLE_DEVELOPER
+- User entity avec implémentation UserDetails
+- UserRepository avec méthodes personnalisées
+- JwtService avec génération et validation complètes
+- AuthController avec endpoint de connexion
+- SecurityConfig avec PasswordEncoder
+- DTOs de requête/réponse validés
 
-✅ **Testing Comprehensive**
-- 25+ tests unitarios definidos
-- 17+ tests unitarios pasando
-- 7 tests de integración end-to-end pasando
-- Cobertura completa del flujo de autenticación
+✅ **Testing Complet**
+- 25+ tests unitaires définis
+- 17+ tests unitaires validés
+- 7 tests d'intégration end-to-end validés
+- Couverture complète du flux d'authentification
 
-✅ **Configuración Multi-Ambiente**
-- H2 para desarrollo rápido
-- PostgreSQL para desarrollo realista
-- Profiles configurados correctamente
-- Datos iniciales automáticos
+✅ **Configuration Multi-Environnement**
+- H2 pour développement rapide
+- PostgreSQL pour développement réaliste
+- Profils configurés correctement
+- Données initiales automatiques
 
-✅ **Documentación Técnica**
-- README_AUTH.md completo
-- Scripts de configuración PostgreSQL
-- Guías de testing y deployment
-- Ejemplos de uso con curl
+✅ **Documentation Technique**
+- README_AUTH.md complet
+- Scripts de configuration PostgreSQL
+- Guides de test et déploiement
+- Exemples d'utilisation avec curl
 
-## 🎯 **Resumen del Sistema**
+## 🎯 **Résumé du Système**
 
-**El sistema de autenticación JWT para StockChef está completamente implementado y testeado**, incluyendo:
+**Le système d'authentification JWT pour StockChef est complètement implémenté et testé**, incluant:
 
-- 🔐 **Autenticación segura** con BCrypt y JWT
-- 👑 **Super-Admin role** (ROLE_DEVELOPER) implementado
-- 🧪 **100% TDD** methodology seguido
-- 🗃️ **PostgreSQL** listo para producción
-- 📊 **Testing end-to-end** completado exitosamente
-- 🚀 **Ready para implementar endpoints protegidos**
+- 🔐 **Authentification sécurisée** avec BCrypt et JWT
+- 👑 **Rôle Super-Admin** (ROLE_DEVELOPER) implémenté
+- 🧪 **Méthodologie 100% TDD** suivie
+- 🗃️ **PostgreSQL** prêt pour production
+- 📊 **Testing end-to-end** complété avec succès
+- 🚀 **Prêt pour implémenter des endpoints protégés**

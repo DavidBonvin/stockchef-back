@@ -1,47 +1,47 @@
-# 🌍 **GUÍA COMPLETA: PONER STOCKCHEF EN PRODUCCIÓN**
+# 🌍 **GUIDE COMPLET: METTRE STOCKCHEF EN PRODUCTION**
 
-## 🚀 **PASOS PARA DEPLOY EN RAILWAY.APP (GRATUITO)**
+## 🚀 **ÉTAPES POUR DEPLOY SUR RAILWAY.APP (GRATUIT)**
 
-### **1. REGISTRARSE EN RAILWAY**
+### **1. S'INSCRIRE SUR RAILWAY**
 ```bash
-# 1. Ve a: https://railway.app
-# 2. Registrate con tu cuenta de GitHub
-# 3. Conecta tu repositorio stockchef-back
-# 4. Obtén $5 USD gratis + 500 horas/mes
+# 1. Allez sur: https://railway.app
+# 2. Inscrivez-vous avec votre compte GitHub
+# 3. Connectez votre dépôt stockchef-back
+# 4. Obtenez $5 USD gratuit + 500 heures/mois
 ```
 
-### **2. CONFIGURAR BASE DE DATOS**
+### **2. CONFIGURER LA BASE DE DONNÉES**
 ```sql
--- Railway te dará automáticamente:
-✅ PostgreSQL gratuita
-✅ Variables de entorno automáticas
-✅ URL de conexión: DATABASE_URL
-✅ Backups automáticos
+-- Railway vous donnera automatiquement:
+✅ PostgreSQL gratuite
+✅ Variables d'environnement automatiques
+✅ URL de connexion: DATABASE_URL
+✅ Sauvegardes automatiques
 ```
 
-### **3. VARIABLES DE ENTORNO EN RAILWAY**
+### **3. VARIABLES D'ENVIRONNEMENT SUR RAILWAY**
 ```bash
-# En Railway Dashboard > Variables:
+# Dans Railway Dashboard > Variables:
 SPRING_PROFILES_ACTIVE=production
-DATABASE_URL=(automático)
-JWT_SECRET=tu-clave-super-secreta-minimo-32-caracteres
-FRONTEND_URL=https://tu-frontend.vercel.app
+DATABASE_URL=(automatique)
+JWT_SECRET=votre-clé-super-secrète-minimum-32-caractères
+FRONTEND_URL=https://votre-frontend.vercel.app
 PORT=8090
 ```
 
-### **4. CONFIGURACIÓN AUTOMÁTICA**
+### **4. CONFIGURATION AUTOMATIQUE**
 ```yaml
-# Railway detecta automáticamente:
-✅ Java 21+ project
-✅ Maven build tool  
-✅ Puerto desde variable PORT
-✅ Health checks automáticos
+# Railway détecte automatiquement:
+✅ Projet Java 21+
+✅ Outil de build Maven  
+✅ Port depuis variable PORT
+✅ Health checks automatiques
 ```
 
-## 🌐 **DEPLOYMENT STEPS**
+## 🌐 **ÉTAPES DE DÉPLOIEMENT**
 
-### **OPCIÓN A: DESDE RAILWAY DASHBOARD**
-1. **Conectar Repositorio**
+### **OPTION A: DEPUIS LE TABLEAU DE BORD RAILWAY**
+1. **Connecter le Dépôt**
    ```
    ✅ Login Railway → New Project
    ✅ Connect GitHub → Select stockchef-back  

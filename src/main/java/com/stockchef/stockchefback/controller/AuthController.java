@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 /**
- * Controlador para autenticación de usuarios
- * Ahora usando UserRepository con MySQL
+ * Contrôleur pour l'authentification des utilisateurs
+ * Maintenant utilise UserRepository avec MySQL
  */
 @RestController
 @RequestMapping("/auth")
@@ -32,57 +32,57 @@ public class AuthController {
     private final JwtService jwtService;
 
     /**
-     * Endpoint para autenticación de usuarios
+     * Endpoint pour l'authentification des utilisateurs
      * 
-     * @param loginRequest Request con email y password
-     * @return LoginResponse con token JWT y datos del usuario
+     * @param loginRequest Request avec email et password
+     * @return LoginResponse avec token JWT et données de l'utilisateur
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        log.info("Intento de login para email: {}", loginRequest.email());
+        log.info("Tentative de connexion pour email: {}", loginRequest.email());
         
         try {
-            // Buscar usuario por email usando UserRepository
+            // Rechercher utilisateur par email avec UserRepository
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.email());
             if (userOptional.isEmpty()) {
-                log.warn("Usuario no encontrado: {}", loginRequest.email());
-                throw new UsernameNotFoundException("Credenciales inválidas");
+                log.warn("Utilisateur non trouvé: {}", loginRequest.email());
+                throw new UsernameNotFoundException("Identifiants invalides");
             }
             
             User user = userOptional.get();
             
-            // Verificar que el usuario esté activo
+            // Vérifier que l'utilisateur est actif
             if (!user.getIsActive()) {
-                log.warn("Usuario inactivo intenta hacer login: {}", loginRequest.email());
-                throw new BadCredentialsException("Usuario inactivo");
+                log.warn("Utilisateur inactif tente de se connecter: {}", loginRequest.email());
+                throw new BadCredentialsException("Utilisateur inactif");
             }
             
-            // Verificar password
+            // Vérifier le mot de passe
             if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
-                log.warn("Password incorrecto para usuario: {}", loginRequest.email());
-                throw new BadCredentialsException("Credenciales inválidas");
+                log.warn("Mot de passe incorrect pour utilisateur: {}", loginRequest.email());
+                throw new BadCredentialsException("Identifiants invalides");
             }
             
-            // Generar JWT token
+            // Générer le token JWT
             String token = jwtService.generateToken(user);
             
-            // Crear response
+            // Créer la réponse
             LoginResponse response = new LoginResponse(
                     token,
                     user.getEmail(),
                     user.getFirstName() + " " + user.getLastName(),
                     user.getRole(),
-                    86400000L // 24 horas en milisegundos
+                    86400000L // 24 heures en millisecondes
             );
             
-            log.info("Login exitoso para usuario: {} con rol: {}", user.getEmail(), user.getRole());
+            log.info("Connexion réussie pour utilisateur: {} avec rôle: {}", user.getEmail(), user.getRole());
             return ResponseEntity.ok(response);
             
         } catch (UsernameNotFoundException | BadCredentialsException e) {
-            log.error("Error de autenticación: {}", e.getMessage());
+            log.error("Erreur d'authentification: {}", e.getMessage());
             return ResponseEntity.status(401).build();
         } catch (Exception e) {
-            log.error("Error interno durante login: ", e);
+            log.error("Erreur interne durant la connexion: ", e);
             return ResponseEntity.status(500).build();
         }
     }

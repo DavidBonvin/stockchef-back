@@ -1,51 +1,51 @@
-# 📚 **Documentación StockChef Backend**
+# 📚 **Documentation StockChef Backend**
 
-## 📄 **Guías Disponibles**
+## 📄 **Guides Disponibles**
 
 ### 🚀 **[QUICK-START.md](QUICK-START.md)**
-- Inicio rápido en 3 pasos
-- Configuración express para desarrollo
-- Comandos básicos de testing
+- Démarrage rapide en 3 étapes
+- Configuration express pour le développement
+- Commandes de base pour les tests
 
 ### 🔧 **[MULTI-DATABASE-SETUP.md](MULTI-DATABASE-SETUP.md)**
-- Guía completa de instalación
-- Configuración detallada para H2, MySQL y PostgreSQL
-- Troubleshooting avanzado
-- Ejemplos de configuración personalizados
+- Guide complet d'installation
+- Configuration détaillée pour H2, MySQL et PostgreSQL
+- Dépannage avancé
+- Exemples de configuration personnalisés
 
-## 🏗️ **Arquitectura del Proyecto**
+## 🏗️ **Architecture du Projet**
 
 ```
 stockchef-back/
-├── start.ps1              # Script de inicio interactivo
+├── start.ps1              # Script de démarrage interactif
 ├── src/main/java/com/stockchef/stockchefback/
-│   ├── controller/        # Controladores REST
+│   ├── controller/        # Contrôleurs REST
 │   │   └── AuthController.java
-│   ├── service/          # Servicios de negocio
+│   ├── service/          # Services métier
 │   │   └── JwtService.java
-│   ├── repository/       # Acceso a datos
+│   ├── repository/       # Accès aux données
 │   │   └── UserRepository.java
-│   ├── entity/           # Entidades JPA
+│   ├── entity/           # Entités JPA
 │   │   └── User.java
-│   └── config/           # Configuración
+│   └── config/           # Configuration
 │       └── DataInitConfig.java
 └── src/main/resources/
-    ├── application.properties           # Configuración base
-    ├── application-h2.properties       # Perfil H2
-    ├── application-mysql.properties    # Perfil MySQL
-    └── application-postgresql.properties # Perfil PostgreSQL
+    ├── application.properties           # Configuration de base
+    ├── application-h2.properties       # Profil H2
+    ├── application-mysql.properties    # Profil MySQL
+    └── application-postgresql.properties # Profil PostgreSQL
 ```
 
-## 🌟 **Características Principales**
+## 🌟 **Fonctionnalités Principales**
 
-- ✅ **Autenticación JWT** - Sistema completo de tokens
-- ✅ **Multi-base de datos** - H2, MySQL, PostgreSQL
-- ✅ **Gestión automática** - Contenedores Docker automáticos
-- ✅ **Perfiles Spring** - Configuraciones independientes
-- ✅ **Inicialización de datos** - Usuario de desarrollo automático
-- ✅ **Documentación completa** - Guías paso a paso
+- ✅ **Authentification JWT** - Système complet de jetons
+- ✅ **Multi-base de données** - H2, MySQL, PostgreSQL
+- ✅ **Gestion automatique** - Conteneurs Docker automatiques
+- ✅ **Profils Spring** - Configurations indépendantes
+- ✅ **Initialisation des données** - Utilisateur de développement automatique
+- ✅ **Documentation complète** - Guides étape par étape
 
-## 🔐 **Credenciales de Desarrollo**
+## 🔐 **Identifiants de Développement**
 
 ```json
 {

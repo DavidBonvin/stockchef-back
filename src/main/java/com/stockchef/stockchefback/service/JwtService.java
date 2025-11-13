@@ -16,20 +16,20 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Servicio para manejo de JSON Web Tokens (JWT)
+ * Service pour la gestion des JSON Web Tokens (JWT)
  */
 @Service
 public class JwtService {
 
-    // Clave secreta para firmar tokens (debería estar en variables de entorno en producción)
+    // Clé secrète pour signer les tokens (devrait être dans les variables d'environnement en production)
     @Value("${jwt.secret:StockChefSecretKeyForDevelopment2024ThisShouldBeLongerInProductionAndStoredInEnvironmentVariables}")
     private String secretKey;
 
-    @Value("${jwt.expiration:86400000}") // 24 horas por defecto
+    @Value("${jwt.expiration:86400000}") // 24 heures par défaut
     private long jwtExpiration;
 
     /**
-     * Genera un token JWT para el usuario
+     * Génère un token JWT pour l'utilisateur
      */
     public String generateToken(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
@@ -41,7 +41,7 @@ public class JwtService {
     }
 
     /**
-     * Genera token con claims adicionales
+     * Génère un token avec des claims additionnels
      */
     public String generateToken(Map<String, Object> extraClaims, User user) {
         return Jwts
@@ -55,21 +55,21 @@ public class JwtService {
     }
 
     /**
-     * Extrae el email (subject) del token
+     * Extrait l'email (subject) du token
      */
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
-     * Extrae el rol del token
+     * Extrait le rôle du token
      */
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     /**
-     * Extrae un claim específico del token
+     * Extrait un claim spécifique du token
      */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -77,14 +77,14 @@ public class JwtService {
     }
 
     /**
-     * Extrae un claim específico por nombre
+     * Extrait un claim spécifique par nom
      */
     public String extractClaim(String token, String claimName) {
         return extractClaim(token, claims -> claims.get(claimName, String.class));
     }
 
     /**
-     * Valida si el token es válido para el usuario
+     * Valide si le token est valide pour l'utilisateur
      */
     public boolean isTokenValid(String token, User user) {
         try {
@@ -96,21 +96,21 @@ public class JwtService {
     }
 
     /**
-     * Verifica si el token está expirado
+     * Vérifie si le token est expiré
      */
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     /**
-     * Extrae la fecha de expiración del token
+     * Extrait la date d'expiration du token
      */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     /**
-     * Extrae todos los claims del token
+     * Extrait tous les claims du token
      */
     private Claims extractAllClaims(String token) {
         return Jwts
@@ -122,7 +122,7 @@ public class JwtService {
     }
 
     /**
-     * Obtiene la clave de firma
+     * Obtient la clé de signature
      */
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(java.util.Base64.getEncoder().encodeToString(secretKey.getBytes()));
