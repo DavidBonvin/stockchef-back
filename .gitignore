@@ -31,3 +31,27 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment Variables ###
+.env
+*.env.local
+*.env.prod
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+logs/
+*.log
+
+### Temporary Files ###
+temp/
+tmp/
+*.tmp
+*.bak
+
+### IDE Personal Settings ###
+*.swp
+*.swo
+*~

@@ -1,2 +1,40 @@
+# Line ending handling
+* text=auto
+
+# Shell scripts (Unix LF)
+*.sh text eol=lf
 /mvnw text eol=lf
+
+# Windows scripts (Windows CRLF)
 *.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Java source files
+*.java text diff=java
+*.kt text diff=java
+
+# Configuration files
+*.properties text
+*.yml text
+*.yaml text
+*.json text
+*.xml text
+
+# Documentation
+*.md text
+
+# Binary files
+*.jar binary
+*.zip binary
+*.tar.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Exclude files from export archive
+.gitattributes export-ignore
+.gitignore export-ignore
+.env.example export-ignore
