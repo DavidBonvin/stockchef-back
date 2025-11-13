@@ -20,7 +20,7 @@ API REST Backend pour StockChef - Système de gestion d'inventaire de cuisine pr
 - [🧪 Tests](#-tests)
 - [📚 API Endpoints](#-api-endpoints)
 - [🔧 Développement](#-développement)
-- [🚀 Déploiement](#-déploiement)
+- [🚀 Déploiement en Production](#-déploiement-en-production)
 - [❓ Résolution de Problèmes](#-résolution-de-problèmes)
 
 ## 🎯 Fonctionnalités
@@ -522,7 +522,69 @@ docker system prune -a
 docker volume prune
 ```
 
-## 📧 Soporte
+## � Déploiement en Production
+
+### 🌐 Production sur Railway
+
+**StockChef Backend est actuellement déployé en production sur Railway !**
+
+- **🔗 URL Production** : `https://stockchef-back-production.up.railway.app`
+- **📊 Status** : ✅ Opérationnel
+- **🔐 Authentification** : JWT activé
+- **💾 Base de données** : H2 (prêt pour PostgreSQL)
+
+#### 📖 Documentation complète
+
+**👉 [Voir la documentation détaillée de déploiement Railway](docs/PRODUCTION-RAILWAY.md)**
+
+Cette documentation contient :
+- ✅ Guide complet de déploiement Railway
+- ✅ Configuration des variables d'environnement
+- ✅ Tests d'authentification en production
+- ✅ Gestion sécurisée des branches
+- ✅ Monitoring et surveillance
+- ✅ Fonctionnalités avancées
+
+#### ⚠️ **ATTENTION - Gestion des Branches**
+
+> 🚨 **IMPORTANT** 🚨
+> 
+> **La branche `main` est connectée à la PRODUCTION !**
+> 
+> - ✅ `main` → Déploiement automatique en production
+> - ✅ Utilisez des branches séparées pour le développement
+> - ✅ Testez localement avant de merger vers `main`
+
+```bash
+# ❌ Ne pas développer directement sur main
+git checkout main
+
+# ✅ Créer une branche pour développer
+git checkout -b feature/ma-nouvelle-fonctionnalite
+# ... développer et tester ...
+git commit -m "feat: nouvelle fonctionnalité"
+
+# ✅ Seulement après validation complète
+git checkout main
+git merge feature/ma-nouvelle-fonctionnalite
+git push origin main  # 🚀 Déploiement automatique !
+```
+
+#### 🧪 Test rapide en production
+
+```bash
+# Vérification santé
+curl https://stockchef-back-production.up.railway.app/api/health
+
+# Test authentification
+curl -X POST https://stockchef-back-production.up.railway.app/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"developer@stockchef.com","password":"devpass123"}'
+```
+
+---
+
+## �📧 Soporte
 
 - **Repositorio**: [https://github.com/DavidBonvin/stockchef-back](https://github.com/DavidBonvin/stockchef-back)
 - **Issues**: [Reportar problemas](https://github.com/DavidBonvin/stockchef-back/issues)
