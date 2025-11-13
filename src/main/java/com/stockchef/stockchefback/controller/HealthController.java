@@ -28,6 +28,11 @@ public class HealthController {
         response.put("version", "0.0.1-SNAPSHOT");
         response.put("service", "stockchef-back");
         
+        // Debug info para Railway
+        response.put("server_port", System.getProperty("server.port"));
+        response.put("port_env", System.getenv("PORT"));
+        response.put("profile", System.getProperty("spring.profiles.active"));
+        
         return ResponseEntity.ok(response);
     }
 
