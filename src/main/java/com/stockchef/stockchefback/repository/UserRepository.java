@@ -8,9 +8,10 @@ import java.util.Optional;
 
 /**
  * Repository para la entidad User
+ * Utiliza String (UUID) como tipo de ID para seguridad
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, String> {
     
     /**
      * Busca un usuario por su email

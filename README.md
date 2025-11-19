@@ -1,12 +1,8 @@
-# 🍽️ StockChef Backend
+# StockChef Backend - API de Gestion des Utilisateurs
 
-![Java](https://img.shields.io/badge/Java-21-orange?style=flat&logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen?style=flat&logo=spring)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat&logo=docker)
-![MySQL](https://img.shields.io/badge/MySQL-8.4-orange?style=flat&logo=mysql)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue?style=flat&logo=postgresql)
+## 📋 Vue d'ensemble
 
-API REST Backend pour StockChef - Système de gestion d'inventaire de cuisine professionnel avec support multi-base de données et conteneurisation Docker complète.
+StockChef Backend est une API REST développée avec Spring Boot 3.5.0 qui implémente un système de gestion d'utilisateurs avec authentification JWT et contrôle d'accès basé sur les rôles.
 
 ## 📋 Table des Matières
 

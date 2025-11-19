@@ -99,21 +99,21 @@ public class InMemoryUserService {
      * Crear usuario helper
      */
     private User createUser(Long id, String email, String password, String firstName, String lastName, UserRole role) {
-        User user = new User();
-        user.setId(id);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setRole(role);
-        user.setIsActive(true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        return user;
+        return User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .firstName(firstName)
+                .lastName(lastName)
+                .role(role)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
     }
 
     /**
-     * Obtener todos los usuarios (para debug)
+     * Obtiene todos los usuarios para administración
      */
     public Map<String, User> getAllUsers() {
         initializeDefaultUsers();
