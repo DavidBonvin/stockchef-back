@@ -1,9 +1,11 @@
 package com.stockchef.stockchefback.service;
 
 import com.stockchef.stockchefback.dto.user.RegisterRequest;
+import com.stockchef.stockchefback.dto.user.UpdateUserRequest;
 import com.stockchef.stockchefback.dto.user.UserResponse;
 import com.stockchef.stockchefback.exception.EmailAlreadyExistsException;
 import com.stockchef.stockchefback.exception.InsufficientPermissionsException;
+import com.stockchef.stockchefback.exception.UnauthorizedUserException;
 import com.stockchef.stockchefback.exception.UserNotFoundException;
 import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
@@ -64,8 +66,8 @@ public class UserService {
     }
 
     /**
-     * Retourne tous les utilisateurs avec leurs rôles effectifs
-     * Accessible uniquement aux ADMIN et DEVELOPER
+     * Retorna todos los usuarios con sus roles efectivos
+     * Accesible únicamente a ADMIN y DEVELOPER
      */
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
@@ -74,6 +76,21 @@ public class UserService {
         return userRepository.findAll().stream()
                 .map(this::convertToUserResponse)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Busca un usuario por su email
+     * Usado para obtener el perfil del usuario autenticado
+     */
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        log.info("Búsqueda de usuario por email: {}", email);
+        
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con email: " + email));
+        
+        log.info("Usuario encontrado: {} (ID: {})", user.getEmail(), user.getId());
+        return convertToUserResponse(user);
     }
 
     /**
@@ -203,5 +220,82 @@ public class UserService {
         }
 
         throw new InsufficientPermissionsException("Permissions insuffisantes pour changer ce rôle");
+    }
+
+    /**
+     * Actualiza la información personal de un usuario (firstName, lastName, email)
+     * Reglas de autorización:
+     * - Todos los roles pueden modificar su propia información
+     * - DEVELOPER y ADMIN pueden modificar información de otros usuarios
+     * - EMPLOYEE y CHEF solo pueden modificar su propia información
+     */
+    public UserResponse updateUser(String userId, UpdateUserRequest request, String currentUserEmail) {
+        log.info("Solicitud de actualización para usuario {} por {}", userId, currentUserEmail);
+
+        // Buscar el usuario a actualizar
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // Buscar el usuario que hace la petición
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuario autenticado no encontrado"));
+
+        // Verificar permisos de autorización
+        validateUpdatePermissions(targetUser, currentUser);
+
+        // Verificar que el email no esté ya en uso por otro usuario
+        if (request.email() != null && !request.email().equals(targetUser.getEmail())) {
+            userRepository.findByEmail(request.email())
+                    .ifPresent(existingUser -> {
+                        if (!existingUser.getId().equals(targetUser.getId())) {
+                            throw new EmailAlreadyExistsException("El email ya está en uso");
+                        }
+                    });
+        }
+
+        // Actualizar los campos solicitados
+        if (request.firstName() != null) {
+            targetUser.setFirstName(request.firstName());
+        }
+        if (request.lastName() != null) {
+            targetUser.setLastName(request.lastName());
+        }
+        if (request.email() != null) {
+            targetUser.setEmail(request.email());
+        }
+
+        // Establecer fecha de actualización
+        targetUser.setUpdatedAt(LocalDateTime.now());
+
+        // Guardar cambios
+        User savedUser = userRepository.save(targetUser);
+
+        log.info("Usuario actualizado exitosamente: {} (ID: {})", savedUser.getEmail(), savedUser.getId());
+
+        return convertToUserResponse(savedUser);
+    }
+
+    /**
+     * Valida los permisos para actualizar información de usuario
+     * @param targetUser Usuario que se va a actualizar
+     * @param currentUser Usuario que hace la petición
+     */
+    private void validateUpdatePermissions(User targetUser, User currentUser) {
+        // Si es el mismo usuario, permitir siempre
+        if (targetUser.getId().equals(currentUser.getId())) {
+            log.info("Usuario {} actualizando su propia información", currentUser.getEmail());
+            return;
+        }
+
+        // Solo DEVELOPER y ADMIN pueden modificar otros usuarios
+        UserRole currentRole = getEffectiveRole(currentUser);
+        if (currentRole != UserRole.ROLE_DEVELOPER && currentRole != UserRole.ROLE_ADMIN) {
+            log.warn("Usuario {} ({}) intentó modificar usuario {} sin permisos", 
+                    currentUser.getEmail(), currentRole, targetUser.getId());
+            throw new UnauthorizedUserException("No tienes permisos para modificar este usuario");
+        }
+
+        log.info("Usuario {} ({}) autorizado para modificar usuario {}", 
+                currentUser.getEmail(), currentRole, targetUser.getId());
     }
 }

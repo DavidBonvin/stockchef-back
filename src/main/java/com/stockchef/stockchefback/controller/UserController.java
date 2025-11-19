@@ -1,6 +1,7 @@
 package com.stockchef.stockchefback.controller;
 
 import com.stockchef.stockchefback.dto.user.RegisterRequest;
+import com.stockchef.stockchefback.dto.user.UpdateUserRequest;
 import com.stockchef.stockchefback.dto.user.UserResponse;
 import com.stockchef.stockchefback.service.UserService;
 import jakarta.validation.Valid;
@@ -53,12 +54,54 @@ public class UserController {
     }
 
     /**
-     * Récupère le profil de l'utilisateur actuellement connecté
+     * Obtiene el perfil del usuario actualmente autenticado
+     * Extrae el email del JWT token y busca el usuario en la base de datos
      */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
-        log.info("Demande de profil utilisateur connecté");
-        // Méthode préparée pour l'intégration JWT future
-        return ResponseEntity.ok().build();
+        log.info("Solicitud de perfil de usuario autenticado");
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando acceder al perfil");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // El email viene del JWT token en el campo 'username' de Spring Security
+        String email = authentication.getName();
+        log.info("Buscando perfil para email: {}", email);
+        
+        UserResponse userProfile = userService.getUserByEmail(email);
+        
+        log.info("Perfil encontrado para usuario: {} (ID: {})", 
+                userProfile.email(), userProfile.id());
+        
+        return ResponseEntity.ok(userProfile);
+    }
+
+    /**
+     * Actualiza la información personal de un usuario
+     * - Todos los roles pueden modificar su propia información
+     * - DEVELOPER y ADMIN pueden modificar información de otros usuarios
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateUserRequest request,
+            Authentication authentication) {
+        
+        log.info("Solicitud de actualización para usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando actualizar perfil");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        UserResponse updatedUser = userService.updateUser(id, request, currentUserEmail);
+        
+        log.info("Usuario actualizado exitosamente: {} (ID: {})", 
+                updatedUser.email(), updatedUser.id());
+        
+        return ResponseEntity.ok(updatedUser);
     }
 }
