@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * Configuration pour initialiser les données dans MySQL
+ * Configuración para inicializar datos de usuario en la base de datos
+ * Crea usuarios por defecto para cada rol si la base de datos está vacía
  */
 @Component
 @RequiredArgsConstructor
@@ -24,13 +25,13 @@ public class DataInitConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Initialisation des données utilisateurs dans MySQL...");
+        log.info("Inicialización de datos de usuarios...");
 
-        // Insérer seulement s'il n'y a pas d'utilisateurs
+        // Insertar solo si no hay usuarios existentes
         if (userRepository.count() == 0) {
             createDefaultUsers();
         } else {
-            log.info("Les utilisateurs existent déjà dans la base de données. Total: {}", userRepository.count());
+            log.info("Los usuarios ya existen en la base de datos. Total: {}", userRepository.count());
         }
     }
 
@@ -44,7 +45,7 @@ public class DataInitConfig implements CommandLineRunner {
             UserRole.ROLE_DEVELOPER
         );
         userRepository.save(developer);
-        log.info("Utilisateur Developer créé: {}", developer.getEmail());
+        log.info("Usuario Developer creado: {}", developer.getEmail());
 
         // Utilisateur Admin
         User admin = createUser(
@@ -55,7 +56,7 @@ public class DataInitConfig implements CommandLineRunner {
             UserRole.ROLE_ADMIN
         );
         userRepository.save(admin);
-        log.info("Utilisateur Admin créé: {}", admin.getEmail());
+        log.info("Usuario Admin creado: {}", admin.getEmail());
 
         // Utilisateur Chef
         User chef = createUser(
@@ -66,7 +67,7 @@ public class DataInitConfig implements CommandLineRunner {
             UserRole.ROLE_CHEF
         );
         userRepository.save(chef);
-        log.info("Utilisateur Chef créé: {}", chef.getEmail());
+        log.info("Usuario Chef creado: {}", chef.getEmail());
 
         // Utilisateur Employee
         User employee = createUser(
@@ -77,21 +78,22 @@ public class DataInitConfig implements CommandLineRunner {
             UserRole.ROLE_EMPLOYEE
         );
         userRepository.save(employee);
-        log.info("Utilisateur Employee créé: {}", employee.getEmail());
+        log.info("Usuario Employee creado: {}", employee.getEmail());
 
-        log.info("Tous les utilisateurs ont été créés avec succès.");
+        log.info("Todos los usuarios han sido creados exitosamente.");
     }
 
     private User createUser(String email, String password, String firstName, String lastName, UserRole role) {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setRole(role);
-        user.setIsActive(true);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        return user;
+        return User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .firstName(firstName)
+                .lastName(lastName)
+                .role(role)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
     }
 }

@@ -2,6 +2,7 @@ package com.stockchef.stockchefback.service;
 
 import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
+import com.stockchef.stockchefback.testutil.TestUuidHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class JwtServiceTest {
     @BeforeEach
     void setUp() {
         testUser = User.builder()
-                .id(1L)
+                .id(TestUuidHelper.USER_1_UUID)
                 .email("developer@stockchef.com")
                 .firstName("Super")
                 .lastName("Developer")
@@ -107,7 +108,7 @@ class JwtServiceTest {
         String token = jwtService.generateToken(testUser);
         
         User differentUser = User.builder()
-                .id(2L)
+                .id(TestUuidHelper.USER_2_UUID)
                 .email("admin@stockchef.com")
                 .role(UserRole.ROLE_ADMIN)
                 .build();
@@ -137,7 +138,7 @@ class JwtServiceTest {
     void shouldGenerateDifferentTokensForDifferentUsers() {
         // Given
         User adminUser = User.builder()
-                .id(2L)
+                .id(TestUuidHelper.USER_2_UUID)
                 .email("admin@stockchef.com")
                 .role(UserRole.ROLE_ADMIN)
                 .build();
@@ -167,7 +168,7 @@ class JwtServiceTest {
         String fullName = jwtService.extractClaim(token, "fullName");
 
         // Then
-        assertThat(userId).isEqualTo("1");
+        assertThat(userId).isEqualTo(TestUuidHelper.USER_1_UUID);
         assertThat(fullName).isEqualTo("Super Developer");
     }
 }

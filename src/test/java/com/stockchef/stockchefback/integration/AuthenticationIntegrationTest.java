@@ -7,6 +7,7 @@ import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
 import com.stockchef.stockchefback.repository.UserRepository;
 import com.stockchef.stockchefback.service.JwtService;
+import com.stockchef.stockchefback.testutil.TestUuidHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,8 @@ class AuthenticationIntegrationTest {
         assertThat(jwtService.isTokenExpired(response.token())).isFalse();
 
         // Verificar claims adicionales
-        assertThat(jwtService.extractClaim(response.token(), "userId")).isEqualTo(user.getId().toString());
+        String userId = jwtService.extractClaim(response.token(), "userId").toString();
+        assertThat(userId).isEqualTo(user.getId());
         assertThat(jwtService.extractClaim(response.token(), "fullName")).isEqualTo("Super Admin");
     }
 
@@ -237,7 +239,9 @@ class AuthenticationIntegrationTest {
 
         // Verify all custom claims
         User user = userRepository.findByEmail("developer@stockchef.com").orElseThrow();
-        assertThat(jwtService.extractClaim(token, "userId")).isEqualTo(user.getId().toString());
+        String userId = jwtService.extractClaim(token, "userId").toString();
+        assertThat(userId).isEqualTo(user.getId());
+        assertThat(TestUuidHelper.isValidUuid(userId)).isTrue();
         assertThat(jwtService.extractClaim(token, "role")).isEqualTo("ROLE_DEVELOPER");
         assertThat(jwtService.extractClaim(token, "fullName")).isEqualTo("Super Admin");
         assertThat(jwtService.extractEmail(token)).isEqualTo("developer@stockchef.com");

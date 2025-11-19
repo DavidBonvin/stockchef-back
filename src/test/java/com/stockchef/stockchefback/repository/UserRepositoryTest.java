@@ -2,6 +2,7 @@ package com.stockchef.stockchefback.repository;
 
 import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
+import com.stockchef.stockchefback.testutil.TestUuidHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ class UserRepositoryTest {
     void setUp() {
         // Crear usuarios de prueba para cada rol
         developerUser = User.builder()
+                .id(TestUuidHelper.DEVELOPER_UUID)
                 .email("developer@stockchef.com")
                 .password(passwordEncoder.encode("dev123"))
                 .firstName("Super")
@@ -50,6 +52,7 @@ class UserRepositoryTest {
                 .build();
 
         adminUser = User.builder()
+                .id(TestUuidHelper.ADMIN_UUID)
                 .email("admin@stockchef.com")
                 .password(passwordEncoder.encode("admin123"))
                 .firstName("Restaurant")
@@ -59,6 +62,7 @@ class UserRepositoryTest {
                 .build();
 
         chefUser = User.builder()
+                .id(TestUuidHelper.USER_1_UUID)
                 .email("chef@stockchef.com")
                 .password(passwordEncoder.encode("chef123"))
                 .firstName("Head")
@@ -68,6 +72,7 @@ class UserRepositoryTest {
                 .build();
 
         employeeUser = User.builder()
+                .id(TestUuidHelper.USER_2_UUID)
                 .email("employee@stockchef.com")
                 .password(passwordEncoder.encode("emp123"))
                 .firstName("Kitchen")
@@ -149,6 +154,7 @@ class UserRepositoryTest {
     void shouldVerifyEmailIsUnique() {
         // Given - intentar crear usuario con email existente
         User duplicateUser = User.builder()
+                .id(TestUuidHelper.USER_3_UUID)
                 .email("developer@stockchef.com") // email duplicado
                 .password("newpass")
                 .firstName("Duplicate")
@@ -179,6 +185,7 @@ class UserRepositoryTest {
     void shouldFindOnlyActiveUsers() {
         // Given - crear usuario inactivo
         User inactiveUser = User.builder()
+                .id(TestUuidHelper.MODERATOR_UUID)
                 .email("inactive@stockchef.com")
                 .password("pass123")
                 .firstName("Inactive")
@@ -212,5 +219,61 @@ class UserRepositoryTest {
         assertThat(foundUser.get().getPassword()).isNotEqualTo("dev123");
         assertThat(foundUser.get().getPassword()).startsWith("$2a$"); // BCrypt format
         assertThat(passwordEncoder.matches("dev123", foundUser.get().getPassword())).isTrue();
+    }
+
+    @Test
+    @DisplayName("Debe tener UUIDs válidos como identificadores")
+    void shouldHaveValidUuidsAsIdentifiers() {
+        // When
+        Optional<User> foundDeveloper = userRepository.findByEmail("developer@stockchef.com");
+        Optional<User> foundAdmin = userRepository.findByEmail("admin@stockchef.com");
+        Optional<User> foundChef = userRepository.findByEmail("chef@stockchef.com");
+        Optional<User> foundEmployee = userRepository.findByEmail("employee@stockchef.com");
+
+        // Verificar que todos los usuarios existen
+        assertThat(foundDeveloper).isPresent();
+        assertThat(foundAdmin).isPresent();
+        assertThat(foundChef).isPresent();
+        assertThat(foundEmployee).isPresent();
+
+        // Verificar que los IDs son UUIDs válidos
+        assertThat(TestUuidHelper.isValidUuid(foundDeveloper.get().getId())).isTrue();
+        assertThat(TestUuidHelper.isValidUuid(foundAdmin.get().getId())).isTrue();
+        assertThat(TestUuidHelper.isValidUuid(foundChef.get().getId())).isTrue();
+        assertThat(TestUuidHelper.isValidUuid(foundEmployee.get().getId())).isTrue();
+
+        // Verificar que los UUIDs específicos fueron asignados correctamente
+        assertThat(foundDeveloper.get().getId()).isEqualTo(TestUuidHelper.DEVELOPER_UUID);
+        assertThat(foundAdmin.get().getId()).isEqualTo(TestUuidHelper.ADMIN_UUID);
+        assertThat(foundChef.get().getId()).isEqualTo(TestUuidHelper.USER_1_UUID);
+        assertThat(foundEmployee.get().getId()).isEqualTo(TestUuidHelper.USER_2_UUID);
+    }
+
+    @Test
+    @DisplayName("Debe encontrar usuario por ID UUID")
+    void shouldFindUserByUuidId() {
+        // When
+        Optional<User> foundByDeveloperId = userRepository.findById(TestUuidHelper.DEVELOPER_UUID);
+        Optional<User> foundByAdminId = userRepository.findById(TestUuidHelper.ADMIN_UUID);
+
+        // Then
+        assertThat(foundByDeveloperId).isPresent();
+        assertThat(foundByDeveloperId.get().getEmail()).isEqualTo("developer@stockchef.com");
+        assertThat(foundByDeveloperId.get().getRole()).isEqualTo(UserRole.ROLE_DEVELOPER);
+
+        assertThat(foundByAdminId).isPresent();
+        assertThat(foundByAdminId.get().getEmail()).isEqualTo("admin@stockchef.com");
+        assertThat(foundByAdminId.get().getRole()).isEqualTo(UserRole.ROLE_ADMIN);
+    }
+
+    @Test
+    @DisplayName("Debe retornar empty cuando busca por UUID inexistente")
+    void shouldReturnEmptyWhenSearchingByNonExistentUuid() {
+        // When
+        String nonExistentUuid = TestUuidHelper.createTestUuid(9999);
+        Optional<User> foundUser = userRepository.findById(nonExistentUuid);
+
+        // Then
+        assertThat(foundUser).isEmpty();
     }
 }

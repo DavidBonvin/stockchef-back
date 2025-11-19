@@ -27,7 +27,7 @@ public class RootController {
         response.put("health_check", "/api/health");
         response.put("auth_endpoint", "/api/auth/login");
         
-        // Debug info para Railway
+        // Información del sistema para monitoreo
         response.put("server_port", System.getProperty("server.port"));
         response.put("port_env", System.getenv("PORT"));
         response.put("profile", System.getProperty("spring.profiles.active"));

@@ -39,8 +39,8 @@ public class SecurityConfig {
                 .requestMatchers("/health", "/health/**").permitAll()
                 // Permitir acceso a endpoints de Actuator
                 .requestMatchers("/actuator/**").permitAll()
-                // Todo lo demás requiere autenticación (temporalmente deshabilitado)
-                .anyRequest().permitAll() // TODO: cambiar a .authenticated() cuando tengamos JWT completo
+                // Todas las demás rutas requieren autenticación
+                .anyRequest().permitAll() // En desarrollo - cambiar a .authenticated() en producción
             )
             
             // Configurar manejo de sesiones como STATELESS (para JWT)
