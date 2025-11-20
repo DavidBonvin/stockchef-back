@@ -48,8 +48,8 @@ StockChef Backend est une API REST développée avec Spring Boot 3.5.0 qui impl�
 
 ### 1. Cloner le Dépôt
 ```bash
-git clone https://github.com/DavidBonvin/stockchef-back.git
-cd stockchef-back
+git clone https://github.com/ZN93/StockChef-Back.git
+cd StockChef-Back
 ```
 
 ### 2. Vérifier Docker

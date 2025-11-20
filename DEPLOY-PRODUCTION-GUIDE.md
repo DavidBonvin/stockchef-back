@@ -48,62 +48,62 @@ PORT=8090
    ✅ Auto-deploy branch: main
    ```
 
-2. **Configurar Variables**
+2. **Configurer les Variables**
    ```
-   ✅ Settings → Variables → Add:
+   ✅ Paramètres → Variables → Ajouter :
      - SPRING_PROFILES_ACTIVE=production
-     - JWT_SECRET=(generar clave segura 32+ chars)
-     - FRONTEND_URL=https://tu-dominio.com
+     - JWT_SECRET=(générer clé sécurisée 32+ caractères)
+     - FRONTEND_URL=https://votre-domaine.com
    ```
 
-3. **Agregar Base de Datos**
+3. **Ajouter Base de Données**
    ```
-   ✅ Add Service → PostgreSQL
-   ✅ Se conecta automáticamente via DATABASE_URL
+   ✅ Ajouter Service → PostgreSQL
+   ✅ Se connecte automatiquement via DATABASE_URL
    ```
 
-### **OPCIÓN B: RAILWAY CLI**
+### **OPTION B : CLI RAILWAY**
 ```bash
-# Instalar Railway CLI
+# Installer Railway CLI
 npm install -g @railway/cli
 
-# Login y deploy
+# Connexion et déploiement
 railway login
-railway link (seleccionar proyecto)
+railway link (sélectionner le projet)
 railway up
 
-# Ver logs en tiempo real  
+# Voir les logs en temps réel  
 railway logs
 ```
 
-## 🔗 **RESULTADO FINAL**
+## 🔗 **RÉSULTAT FINAL**
 ```
 🌍 Backend URL: https://stockchef-back-production.up.railway.app/api
 🔍 Health Check: https://stockchef-back-production.up.railway.app/api/health
 🔐 Login Endpoint: https://stockchef-back-production.up.railway.app/api/auth/login
 
-# Test desde cualquier parte del mundo:
+# Test depuis n'importe où dans le monde :
 curl -X POST https://stockchef-back-production.up.railway.app/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"developer@stockchef.com","password":"devpass123"}'
 ```
 
-## 📱 **FRONTEND CON IONIC + REACT**
+## 📱 **FRONTEND AVEC IONIC + REACT**
 
-### **SETUP IONIC REACT**
+### **CONFIGURATION IONIC REACT**
 ```bash
-# Instalar Ionic CLI
+# Installer Ionic CLI
 npm install -g @ionic/cli
 
-# Crear proyecto
+# Créer le projet
 ionic start stockchef-front react --type=react --capacitor
 
-# Configurar para consumir tu API
+# Configurer pour consommer votre API
 cd stockchef-front
 npm install axios
 ```
 
-### **CONFIGURACIÓN PARA PRODUCCIÓN**
+### **CONFIGURATION POUR PRODUCTION**
 ```typescript
 // src/config/api.ts
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -113,76 +113,76 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 export default API_BASE_URL;
 ```
 
-### **DEPLOY FRONTEND EN VERCEL (GRATIS)**
+### **DÉPLOIEMENT FRONTEND SUR VERCEL (GRATUIT)**
 ```bash
-# 1. Push a GitHub
+# 1. Push vers GitHub
 git push origin main
 
-# 2. Conectar en vercel.com
-# 3. Auto-deploy desde GitHub
-# 4. URL: https://stockchef-front.vercel.app
+# 2. Connecter sur vercel.com
+# 3. Déploiement automatique depuis GitHub
+# 4. URL : https://stockchef-front.vercel.app
 ```
 
-## 📊 **FLUJO DE DESARROLLO PROFESIONAL**
+## 📊 **FLUX DE DÉVELOPPEMENT PROFESSIONNEL**
 
 ```mermaid
 graph TD
-    A[Desarrollo Local] --> B[Push a david branch]
+    A[Développement Local] --> B[Push vers branche david]
     B --> C[Testing & QA]
-    C --> D[Merge a main branch] 
-    D --> E[Auto-deploy a Railway]
-    E --> F[Producción Live 🚀]
+    C --> D[Merge vers branche main] 
+    D --> E[Déploiement auto sur Railway]
+    E --> F[Production Live 🚀]
     
-    G[Frontend Local] --> H[Push a GitHub]
-    H --> I[Auto-deploy Vercel]
+    G[Frontend Local] --> H[Push vers GitHub]
+    H --> I[Déploiement auto Vercel]
     I --> J[Frontend Live 🌐]
 ```
 
-## 🔄 **COMANDOS PARA GESTIONAR RAMAS**
+## 🔄 **COMMANDES POUR GÉRER LES BRANCHES**
 
 ```bash
-# Desarrollo (rama david)
+# Développement (branche david)
 git checkout david
 git pull origin david
-# ... hacer cambios ...
+# ... faire des modifications ...
 git add .
-git commit -m "Nueva funcionalidad"
+git commit -m "Nouvelle fonctionnalité"
 git push origin david
 
-# Producción (rama main)  
+# Production (branche main)  
 git checkout main
-git merge david          # Fusionar desarrollo
-git push origin main     # Auto-deploy a Railway
+git merge david          # Fusionner le développement
+git push origin main     # Déploiement auto sur Railway
 ```
 
-## 🎯 **VENTAJAS DE ESTE SETUP**
+## 🎯 **AVANTAGES DE CETTE CONFIGURATION**
 
 ```
-✅ GRATUITO: $0/mes para empezar
-✅ GLOBAL: Accessible desde cualquier país  
-✅ ESCALABLE: Fácil upgrade cuando necesites
-✅ PROFESIONAL: CI/CD automático
-✅ SEGURO: HTTPS automático + PostgreSQL
-✅ MONITOREO: Logs y métricas incluidas
+✅ GRATUIT : 0€/mois pour commencer
+✅ GLOBAL : Accessible depuis n'importe quel pays  
+✅ SCALABLE : Mise à niveau facile quand nécessaire
+✅ PROFESSIONNEL : CI/CD automatique
+✅ SÉCURISÉ : HTTPS automatique + PostgreSQL
+✅ MONITORING : Logs et métriques inclus
 ```
 
-## 🛡️ **SEGURIDAD EN PRODUCCIÓN**
+## 🛡️ **SÉCURITÉ EN PRODUCTION**
 
 ```bash
-# Variables que NUNCA subir a GitHub:
-JWT_SECRET=clave-super-secreta-produccion
-DATABASE_PASSWORD=password-seguro
+# Variables à NE JAMAIS pousser sur GitHub :
+JWT_SECRET=clé-super-secrète-production
+DATABASE_PASSWORD=mot-de-passe-sécurisé
 
-# Usar siempre variables de entorno en Railway
-# ✅ Security → Environment Variables
+# Toujours utiliser les variables d'environnement dans Railway
+# ✅ Sécurité → Variables d'Environnement
 ```
 
-## 📈 **PRÓXIMOS PASOS**
+## 📈 **PROCHAINES ÉTAPES**
 
-1. **Deploy Backend** → Railway (15 min)
-2. **Crear Frontend** → Ionic React (2 horas)  
-3. **Deploy Frontend** → Vercel (10 min)
-4. **Configurar CORS** → Backend para permitir frontend
-5. **Testing E2E** → Probar desde Francia 🇫🇷
+1. **Déployer Backend** → Railway (15 min)
+2. **Créer Frontend** → Ionic React (2 heures)  
+3. **Déployer Frontend** → Vercel (10 min)
+4. **Configurer CORS** → Backend pour autoriser le frontend
+5. **Tests E2E** → Tester depuis la France 🇫🇷
 
-**¿Quieres que te ayude con algún paso específico?** 🚀
+**Voulez-vous que je vous aide avec une étape spécifique ?** 🚀

@@ -1,252 +1,253 @@
-# 🐳 StockChef Backend - Configuración Docker Detallada
+# 🐳 StockChef Backend - Configuration Docker Détaillée
 
-Este documento contiene la configuración avanzada de Docker para StockChef Backend. 
+Ce document contient la configuration avancée de Docker pour StockChef Backend. 
 
-> 📚 **Nota**: Para uso general, consulta el [README principal](README.md) que incluye toda la información necesaria.
+> 📚 **Note**: Pour un usage général, consultez le [README principal](README.md) qui inclut toute l'information nécessaire.
 
-Este proyecto incluye una configuración completa de Docker que permite ejecutar la aplicación StockChef con soporte para MySQL y PostgreSQL de manera flexible y profesional.
+Ce projet inclut une configuration complète de Docker qui permet d'exécuter l'application StockChef avec support pour MySQL et PostgreSQL de manière flexible et professionnelle.
 
-## 📋 Prerequisitos
+## 📋 Prérequis
 
-- Docker Desktop instalado y ejecutándose
-- Docker Compose v2.0 o superior
-- Puertos disponibles: 8090, 3306, 5432, 8080, 8081
+- Docker Desktop installé et en cours d'exécution
+- Docker Compose v2.0 ou supérieur
+- Ports disponibles: 8090, 3306, 5432, 8080, 8081
 
-## 🚀 Inicio Rápido
+## 🚀 Démarrage Rapide
 
-### 1. Configuración inicial
+### 1. Configuration initiale
 ```bash
-# Copiar archivo de configuración
+# Copier le fichier de configuration
 cp .env.example .env
 
-# Editar configuraciones si es necesario
-# DATABASE_TYPE=mysql  (o postgres)
+# Éditer les configurations si nécessaire
+# DATABASE_TYPE=mysql  (ou postgres)
 ```
 
-### 2. Ejecutar con MySQL (recomendado)
+### 2. Exécuter avec MySQL (recommandé)
 ```bash
-# Usando script de PowerShell (Windows)
+# Utilisant le script PowerShell (Windows)
 .\docker-manager.ps1 up mysql
 
-# Usando script bash (Linux/Mac)
+# Utilisant le script bash (Linux/Mac)
 ./docker-manager.sh up mysql
 
-# O directamente con docker-compose
+# Ou directement avec docker-compose
 docker-compose up -d mysql stockchef-backend
 ```
 
-### 3. Ejecutar con PostgreSQL
+### 3. Exécuter avec PostgreSQL
 ```bash
-# Usando script de PowerShell (Windows)
+# Utilisant le script PowerShell (Windows)
 .\docker-manager.ps1 up postgres
 
-# Usando script bash (Linux/Mac)
+# Utilisant le script bash (Linux/Mac)
 ./docker-manager.sh up postgres
 
-# O directamente con docker-compose
+# Ou directement avec docker-compose
 docker-compose up -d postgres stockchef-backend
 ```
 
-## 🛠️ Gestión de Servicios
+## 🛠️ Gestion des Services
 
-### Scripts de Administración
+### Scripts d'Administration
 
-Los scripts `docker-manager.ps1` (Windows) y `docker-manager.sh` (Linux/Mac) proporcionan una interfaz fácil para gestionar el entorno:
+Les scripts `docker-manager.ps1` (Windows) et `docker-manager.sh` (Linux/Mac) fournissent une interface facile pour gérer l'environnement:
 
 ```bash
-# Comandos principales
-.\docker-manager.ps1 up mysql        # Iniciar con MySQL
-.\docker-manager.ps1 up postgres     # Iniciar con PostgreSQL
-.\docker-manager.ps1 down            # Parar servicios
-.\docker-manager.ps1 restart mysql   # Reiniciar con MySQL
-.\docker-manager.ps1 status          # Ver estado de servicios
-.\docker-manager.ps1 logs backend    # Ver logs del backend
-.\docker-manager.ps1 tools           # Iniciar herramientas de administración
-.\docker-manager.ps1 clean           # Limpiar datos (¡cuidado!)
-.\docker-manager.ps1 build           # Reconstruir imagen
+# Commandes principales
+.\docker-manager.ps1 up mysql        # Démarrer avec MySQL
+.\docker-manager.ps1 up postgres     # Démarrer avec PostgreSQL
+.\docker-manager.ps1 down            # Arrêter les services
+.\docker-manager.ps1 restart mysql   # Redémarrer avec MySQL
+.\docker-manager.ps1 status          # Voir l'état des services
+.\docker-manager.ps1 logs backend    # Voir les logs du backend
+.\docker-manager.ps1 tools           # Démarrer les outils d'administration
+.\docker-manager.ps1 clean           # Nettoyer les données (attention!)
+.\docker-manager.ps1 build           # Reconstruire l'image
 ```
 
-### Comandos Docker Compose Directos
+### Commandes Docker Compose Directes
 
 ```bash
-# Iniciar servicios
+# Démarrer les services
 docker-compose up -d
 
-# Ver logs
+# Voir les logs
 docker-compose logs -f stockchef-backend
 docker-compose logs -f mysql
 docker-compose logs -f postgres
 
-# Parar servicios
+# Arrêter les services
 docker-compose down
 
-# Reconstruir imagen
+# Reconstruire l'image
 docker-compose build --no-cache stockchef-backend
 ```
 
-## 🌐 Puertos y Servicios
+## 🌐 Ports et Services
 
-| Servicio | Puerto | URL | Descripción |
+| Service | Port | URL | Description |
 |----------|--------|-----|-------------|
 | Backend | 8090 | http://localhost:8090/api | API StockChef |
-| MySQL | 3306 | localhost:3306 | Base de datos MySQL |
-| PostgreSQL | 5432 | localhost:5432 | Base de datos PostgreSQL |
-| phpMyAdmin | 8080 | http://localhost:8080 | Administración MySQL |
-| pgAdmin | 8081 | http://localhost:8081 | Administración PostgreSQL |
+| MySQL | 3306 | localhost:3306 | Base de données MySQL |
+| PostgreSQL | 5432 | localhost:5432 | Base de données PostgreSQL |
+| phpMyAdmin | 8080 | http://localhost:8080 | Administration MySQL |
+| pgAdmin | 8081 | http://localhost:8081 | Administration PostgreSQL |
 
-## 🔍 Endpoints Importantes
+## 🔍 Endpoints Importants
 
 ### Health Check
+```bash
 ```bash
 curl http://localhost:8090/api/health
 ```
 
-### Status con información de base de datos
+### Status avec informations de base de données
 ```bash
 curl http://localhost:8090/api/health/status
 ```
 
-## 🗄️ Bases de Datos
+## 🗄️ Bases de Données
 
-### Configuración MySQL
-- **Host**: mysql (interno) / localhost:3306 (externo)
-- **Base de datos**: stockchef_db
-- **Usuario**: stockchef_user
-- **Password**: UserAdmin
-- **Root Password**: UserAdmin
+### Configuration MySQL
+- **Host**: mysql (interne) / localhost:3306 (externe)
+- **Base de données**: stockchef_db
+- **Utilisateur**: stockchef_user
+- **Mot de passe**: UserAdmin
+- **Mot de passe Root**: UserAdmin
 
-### Configuración PostgreSQL
-- **Host**: postgres (interno) / localhost:5432 (externo)
-- **Base de datos**: stockchef_db
-- **Usuario**: postgres
-- **Password**: UserAdmin
+### Configuration PostgreSQL
+- **Host**: postgres (interne) / localhost:5432 (externe)
+- **Base de données**: stockchef_db
+- **Utilisateur**: postgres
+- **Mot de passe**: UserAdmin
 
-## 🔧 Herramientas de Administración
+## 🔧 Outils d'Administration
 
 ### phpMyAdmin (MySQL)
 - **URL**: http://localhost:8080
-- **Usuario**: root
-- **Password**: UserAdmin
+- **Utilisateur**: root
+- **Mot de passe**: UserAdmin
 
 ### pgAdmin (PostgreSQL)
 - **URL**: http://localhost:8081
 - **Email**: admin@stockchef.com
-- **Password**: UserAdmin
+- **Mot de passe**: UserAdmin
 
-Para iniciar las herramientas:
+Pour démarrer les outils:
 ```bash
 .\docker-manager.ps1 tools
 ```
 
-## 📁 Estructura de Archivos
+## 📁 Structure des Fichiers
 
 ```
-├── docker-compose.yml          # Configuración principal de Docker Compose
-├── Dockerfile                  # Imagen de la aplicación Spring Boot
-├── .env.example               # Archivo de configuración de ejemplo
-├── .dockerignore              # Archivos a ignorar en el build
-├── docker-manager.ps1         # Script de gestión para Windows
-├── docker-manager.sh          # Script de gestión para Linux/Mac
-├── docker/                    # Configuraciones específicas de Docker
+├── docker-compose.yml          # Configuration principale de Docker Compose
+├── Dockerfile                  # Image de l'application Spring Boot
+├── .env.example               # Fichier de configuration d'exemple
+├── .dockerignore              # Fichiers à ignorer dans le build
+├── docker-manager.ps1         # Script de gestion pour Windows
+├── docker-manager.sh          # Script de gestion pour Linux/Mac
+├── docker/                    # Configurations spécifiques de Docker
 │   ├── mysql/
-│   │   └── init.sql          # Script de inicialización MySQL
+│   │   └── init.sql          # Script d'initialisation MySQL
 │   └── postgres/
-│       └── init.sql          # Script de inicialización PostgreSQL
+│       └── init.sql          # Script d'initialisation PostgreSQL
 └── src/main/resources/
     ├── application-docker-mysql.properties
     └── application-docker-postgres.properties
 ```
 
-## 🔄 Cambio entre Bases de Datos
+## 🔄 Changement entre Bases de Données
 
-Para cambiar de MySQL a PostgreSQL o viceversa:
+Pour passer de MySQL à PostgreSQL ou vice versa:
 
-1. **Parar servicios actuales**:
+1. **Arrêter les services actuels**:
    ```bash
    .\docker-manager.ps1 down
    ```
 
-2. **Iniciar con la nueva base de datos**:
+2. **Démarrer avec la nouvelle base de données**:
    ```bash
-   .\docker-manager.ps1 up postgres  # o mysql
+   .\docker-manager.ps1 up postgres  # ou mysql
    ```
 
-3. **O editar .env y reiniciar**:
+3. **Ou éditer .env et redémarrer**:
    ```bash
-   # Cambiar DATABASE_TYPE en .env
+   # Changer DATABASE_TYPE dans .env
    .\docker-manager.ps1 restart
    ```
 
-## 💾 Persistencia de Datos
+## 💾 Persistance des Données
 
-Los datos se almacenan en volúmenes de Docker:
-- `mysql_data`: Datos de MySQL
-- `postgres_data`: Datos de PostgreSQL
-- `pgadmin_data`: Configuración de pgAdmin
+Les données sont stockées dans des volumes Docker:
+- `mysql_data`: Données MySQL
+- `postgres_data`: Données PostgreSQL
+- `pgadmin_data`: Configuration pgAdmin
 
-Para limpiar todos los datos:
+Pour nettoyer toutes les données:
 ```bash
 .\docker-manager.ps1 clean
 ```
 
-## 🐛 Resolución de Problemas
+## 🐛 Résolution de Problèmes
 
-### Verificar estado de servicios
+### Vérifier l'état des services
 ```bash
 .\docker-manager.ps1 status
 docker-compose ps
 ```
 
-### Ver logs detallados
+### Voir les logs détaillés
 ```bash
 .\docker-manager.ps1 logs backend
 .\docker-manager.ps1 logs mysql
 .\docker-manager.ps1 logs postgres
 ```
 
-### Reconstruir imagen si hay cambios en el código
+### Reconstruire l'image si il y a des changements dans le code
 ```bash
 .\docker-manager.ps1 build
 ```
 
-### Problemas de puertos ocupados
-Si los puertos están ocupados, puedes modificar el archivo `.env`:
+### Problèmes de ports occupés
+Si les ports sont occupés, vous pouvez modifier le fichier `.env`:
 ```bash
 BACKEND_PORT=8091
 MYSQL_PORT=3307
 POSTGRES_PORT=5433
 ```
 
-### Limpiar sistema Docker
+### Nettoyer le système Docker
 ```bash
 docker system prune -a
 docker volume prune
 ```
 
-## 🔒 Seguridad
+## 🔒 Sécurité
 
-⚠️ **Importante**: Las contraseñas por defecto son para desarrollo. Para producción:
+⚠️ **Important**: Les mots de passe par défaut sont pour le développement. Pour la production:
 
-1. Cambia todas las contraseñas en `.env`
-2. Usa variables de entorno seguras
-3. Configura firewalls apropiados
-4. Usa HTTPS con certificados SSL
+1. Changez tous les mots de passe dans `.env`
+2. Utilisez des variables d'environnement sécurisées
+3. Configurez des pare-feux appropriés
+4. Utilisez HTTPS avec des certificats SSL
 
-## 🚀 Despliegue en Producción
+## 🚀 Déploiement en Production
 
-Para producción, considera:
+Pour la production, considérez:
 
-1. **Variables de entorno seguras**
-2. **Secretos de Docker/Kubernetes**
-3. **Redes privadas**
-4. **Backup automático de bases de datos**
-5. **Monitoreo y alertas**
+1. **Variables d'environnement sécurisées**
+2. **Secrets Docker/Kubernetes**
+3. **Réseaux privés**
+4. **Sauvegarde automatique des bases de données**
+5. **Monitoring et alertes**
 6. **Load balancers**
-7. **Certificados SSL/TLS**
+7. **Certificats SSL/TLS**
 
-## 📝 Notas
+## 📝 Notes
 
-- El backend se configura automáticamente según la base de datos seleccionada
-- Los health checks aseguran que las bases de datos estén listas antes de iniciar el backend
-- Las herramientas de administración son opcionales y se inician con el perfil `tools`
-- Los volúmenes persisten los datos entre reinicios de contenedores
+- Le backend se configure automatiquement selon la base de données sélectionnée
+- Les health checks assurent que les bases de données soient prêtes avant de démarrer le backend
+- Les outils d'administration sont optionnels et se démarrent avec le profil `tools`
+- Les volumes persistent les données entre les redémarrages de conteneurs

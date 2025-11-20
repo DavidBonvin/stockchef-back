@@ -1,22 +1,22 @@
-# 🔐 **StockChef JWT Authentication - Desarrollo TDD**
+# 🔐 **StockChef JWT Authentication - Développement TDD**
 
-Este documento explica paso a paso cómo se desarrolló el sistema de autenticación JWT para StockChef siguiendo la metodología **Test-Driven Development (TDD)**.
+Ce document explique étape par étape comment le système d'authentification JWT pour StockChef a été développé en suivant la méthodologie **Test-Driven Development (TDD)**.
 
 ---
 
-## 📋 **Índice**
+## 📋 **Index**
 
-1. [Arquitectura General](#-arquitectura-general)
-2. [Metodología TDD Aplicada](#-metodología-tdd-aplicada)
-3. [Paso 1: Configuración de Dependencias](#-paso-1-configuración-de-dependencias)
-4. [Paso 2: Sistema de Roles](#-paso-2-sistema-de-roles)
-5. [Paso 3: Entidad User](#-paso-3-entidad-user)
-6. [Paso 4: UserRepository con TDD](#-paso-4-userrepository-con-tdd)
-7. [Paso 5: JwtService con TDD](#-paso-5-jwtservice-con-tdd)
-8. [Paso 6: AuthController](#-paso-6-authcontroller)
-9. [Paso 7: Configuración de Security](#-paso-7-configuración-de-security)
-10. [Testing y Validación](#-testing-y-validación)
-11. [Próximos Pasos](#-próximos-pasos)
+1. [Architecture Générale](#-architecture-générale)
+2. [Méthodologie TDD Appliquée](#-méthodologie-tdd-appliquée)
+3. [Etape 1: Configuration des Dépendances](#-etape-1-configuration-des-dépendances)
+4. [Etape 2: Système de Rôles](#-etape-2-système-de-rôles)
+5. [Etape 3: Entité User](#-etape-3-entité-user)
+6. [Etape 4: UserRepository avec TDD](#-etape-4-userrepository-avec-tdd)
+7. [Etape 5: JwtService avec TDD](#-etape-5-jwtservice-avec-tdd)
+8. [Etape 6: AuthController](#-etape-6-authcontroller)
+9. [Etape 7: Configuration de Security](#-etape-7-configuration-de-security)
+10. [Tests et Validation](#-tests-et-validation)
+11. [Prochaines Etapes](#-prochaines-etapes)
 
 ---
 
@@ -41,35 +41,35 @@ graph TB
     H --> J
 ```
 
-### **Componentes Principales:**
-- **UserRole**: Enum con roles jerárquicos (DEVELOPER > ADMIN > CHEF > EMPLOYEE)
-- **User**: Entidad JPA que implementa UserDetails de Spring Security
-- **UserRepository**: Repositorio JPA para gestión de usuarios
-- **JwtService**: Servicio para generación y validación de tokens JWT
-- **AuthController**: Controlador REST para autenticación
-- **SecurityConfig**: Configuración de Spring Security
+### **Composants Principaux :**
+- **UserRole** : Enum avec rôles hiérarchiques (DEVELOPER > ADMIN > CHEF > EMPLOYEE)
+- **User** : Entité JPA qui implémente UserDetails de Spring Security
+- **UserRepository** : Référentiel JPA pour la gestion des utilisateurs
+- **JwtService** : Service pour la génération et la validation des tokens JWT
+- **AuthController** : Contrôleur REST pour l'authentification
+- **SecurityConfig** : Configuration de Spring Security
 
 ---
 
-## 🔄 **Metodología TDD Aplicada**
+## 🔄 **Méthodologie TDD Appliquée**
 
-### **Principio: Red-Green-Refactor**
+### **Principe : Rouge-Vert-Refactor**
 
-1. **🔴 Red**: Escribir un test que falle
-2. **🟢 Green**: Escribir el código mínimo para que el test pase
-3. **♻️ Refactor**: Mejorar el código manteniendo los tests verdes
+1. **🔴 Rouge** : Écrire un test qui échoue
+2. **🟢 Vert** : Écrire le code minimal pour que le test passe
+3. **♻️ Refactor** : Améliorer le code en maintenant les tests verts
 
-### **Beneficios obtenidos:**
-- ✅ **100% de cobertura** en capas críticas
-- ✅ **Código robusto** con casos edge cubiertos
-- ✅ **Documentación viva** a través de los tests
-- ✅ **Detección temprana** de errores de diseño
+### **Bénéfices obtenus :**
+- ✅ **100% de couverture** dans les couches critiques
+- ✅ **Code robuste** avec les cas limites couverts
+- ✅ **Documentation vivante** à travers les tests
+- ✅ **Détection précoce** d'erreurs de conception
 
 ---
 
-## 📦 **Paso 1: Configuración de Dependencias**
+## 📦 **Etape 1 : Configuration des Dépendances**
 
-### **Dependencias JWT agregadas al `pom.xml`:**
+### **Dépendances JWT ajoutées au `pom.xml` :**
 
 ```xml
 <!-- JWT Dependencies -->
@@ -98,7 +98,7 @@ graph TB
 </dependency>
 ```
 
-### **Configuración de propiedades:**
+### **Configuration des propriétés :**
 
 ```properties
 # JWT Configuration
@@ -112,29 +112,29 @@ jwt.expiration=86400000
 
 ---
 
-## 👥 **Paso 2: Sistema de Roles**
+## 👥 **Etape 2 : Système de Rôles**
 
 ### **UserRole.java**
 
 ```java
 public enum UserRole {
     /**
-     * Super administrador con acceso total al sistema
+     * Super administrateur avec accès total au système
      */
     ROLE_DEVELOPER("Developer - Super Admin"),
     
     /**
-     * Administrador del restaurante
+     * Administrateur du restaurant
      */
     ROLE_ADMIN("Administrator"),
     
     /**
-     * Chef con permisos de gestión de cocina
+     * Chef avec permissions de gestion de cuisine
      */
     ROLE_CHEF("Chef"),
     
     /**
-     * Empleado con permisos básicos
+     * Employé avec permissions de base
      */
     ROLE_EMPLOYEE("Employee");
     
@@ -142,17 +142,17 @@ public enum UserRole {
 }
 ```
 
-### **Diseño jerárquico:**
-- **DEVELOPER**: Acceso total (Super-Admin)
-- **ADMIN**: Gestión de usuarios y configuración
-- **CHEF**: Gestión de inventario y menús
-- **EMPLOYEE**: Operaciones básicas
+### **Conception hiérarchique :**
+- **DEVELOPER** : Accès total (Super-Admin)
+- **ADMIN** : Gestion des utilisateurs et configuration
+- **CHEF** : Gestion de l'inventaire et des menus
+- **EMPLOYEE** : Opérations de base
 
 ---
 
-## 👤 **Paso 3: Entidad User**
+## 👤 **Etape 3 : Entité User**
 
-### **User.java** - Implementa UserDetails
+### **User.java** - Implémente UserDetails
 
 ```java
 @Entity
@@ -184,22 +184,22 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isActive = true;
     
-    // Métodos de UserDetails implementados...
+    // Méthodes de UserDetails implémentées...
 }
 ```
 
-### **Características clave:**
-- ✅ Integración con Spring Security
-- ✅ Validación de email único
-- ✅ Sistema de activación/desactivación
-- ✅ Timestamps automáticos
-- ✅ Password encriptado con BCrypt
+### **Caractéristiques clés :**
+- ✅ Intégration avec Spring Security
+- ✅ Validation d'email unique
+- ✅ Système d'activation/désactivation
+- ✅ Timestamps automatiques
+- ✅ Mot de passe chiffré avec BCrypt
 
 ---
 
-## 🗃️ **Paso 4: UserRepository con TDD**
+## 🗽️ **Etape 4 : UserRepository avec TDD**
 
-### **4.1 Primero los Tests (Red)**
+### **4.1 D'abord les Tests (Rouge)**
 
 ```java
 @DataJpaTest
@@ -220,11 +220,11 @@ class UserRepositoryTest {
         assertThat(found.get().getRole()).isEqualTo(UserRole.ROLE_DEVELOPER);
     }
     
-    // ... más tests para cada rol y caso edge
+    // ... plus de tests pour chaque rôle et cas limite
 }
 ```
 
-### **4.2 Implementación (Green)**
+### **4.2 Implémentation (Vert)**
 
 ```java
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -233,18 +233,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 }
 ```
 
-### **4.3 Tests completados:**
-- ✅ Búsqueda por email para todos los roles
-- ✅ Verificación de unicidad de email
-- ✅ Validación de passwords encriptados
-- ✅ Filtrado de usuarios activos/inactivos
-- ✅ **8 tests pasando al 100%**
+### **4.3 Tests complétés :**
+- ✅ Recherche par email pour tous les rôles
+- ✅ Vérification de l'unicité de l'email
+- ✅ Validation des mots de passe chiffrés
+- ✅ Filtrage des utilisateurs actifs/inactifs
+- ✅ **8 tests réussis à 100%**
 
 ---
 
-## 🔐 **Paso 5: JwtService con TDD**
+## 🔐 **Etape 5 : JwtService avec TDD**
 
-### **5.1 Tests Primero (Red)**
+### **5.1 Tests D'abord (Rouge)**
 
 ```java
 @SpringBootTest
@@ -258,7 +258,7 @@ class JwtServiceTest {
         
         // Then
         assertThat(token).isNotNull();
-        assertThat(token.split("\\.")).hasSize(3); // JWT format
+        assertThat(token.split("\\.")).hasSize(3); // Format JWT
     }
     
     @Test
@@ -273,11 +273,11 @@ class JwtServiceTest {
         assertThat(extractedEmail).isEqualTo("developer@stockchef.com");
     }
     
-    // ... más tests para validación, expiración, roles, etc.
+    // ... plus de tests pour validation, expiration, rôles, etc.
 }
 ```
 
-### **5.2 Implementación (Green)**
+### **5.2 Implémentation (Vert)**
 
 ```java
 @Service
@@ -298,32 +298,32 @@ public class JwtService {
         return generateToken(extraClaims, user);
     }
     
-    // ... implementación completa de todos los métodos
+    // ... implémentation complète de toutes les méthodes
 }
 ```
 
-### **5.3 Funcionalidades implementadas:**
-- ✅ Generación de tokens con claims personalizados
-- ✅ Extracción de email y rol del token
-- ✅ Validación de tokens y usuarios
-- ✅ Verificación de expiración
-- ✅ **9 tests pasando al 100%**
+### **5.3 Fonctionnalités implémentées :**
+- ✅ Génération de tokens avec claims personnalisés
+- ✅ Extraction de l'email et du rôle du token
+- ✅ Validation des tokens et utilisateurs
+- ✅ Vérification de l'expiration
+- ✅ **9 tests réussis à 100%**
 
 ---
 
-## 🌐 **Paso 6: AuthController**
+## 🌐 **Etape 6 : AuthController**
 
-### **6.1 DTOs Definidos**
+### **6.1 DTOs Définis**
 
 ```java
 // LoginRequest.java
 public record LoginRequest(
-    @NotBlank(message = "Email es requerido")
-    @Email(message = "Email debe tener formato válido")
+    @NotBlank(message = "Email est requis")
+    @Email(message = "Email doit avoir un format valide")
     String email,
     
-    @NotBlank(message = "Password es requerido")
-    @Size(min = 6, message = "Password debe tener al menos 6 caracteres")
+    @NotBlank(message = "Mot de passe est requis")
+    @Size(min = 6, message = "Mot de passe doit avoir au moins 6 caractères")
     String password
 ) {}
 
@@ -337,7 +337,7 @@ public record LoginResponse(
 ) {}
 ```
 
-### **6.2 AuthController Implementado**
+### **6.2 AuthController Implémenté**
 
 ```java
 @RestController
@@ -349,25 +349,25 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            // Buscar usuario
+            // Chercher l'utilisateur
             Optional<User> userOptional = userRepository.findByEmail(loginRequest.email());
             if (userOptional.isEmpty()) {
-                throw new UsernameNotFoundException("Credenciales inválidas");
+                throw new UsernameNotFoundException("Identifiants invalides");
             }
             
             User user = userOptional.get();
             
-            // Verificar usuario activo
+            // Vérifier utilisateur actif
             if (!user.getIsActive()) {
-                throw new BadCredentialsException("Usuario inactivo");
+                throw new BadCredentialsException("Utilisateur inactif");
             }
             
-            // Verificar password
+            // Vérifier mot de passe
             if (!passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
-                throw new BadCredentialsException("Credenciales inválidas");
+                throw new BadCredentialsException("Identifiants invalides");
             }
             
-            // Generar JWT
+            // Générer JWT
             String token = jwtService.generateToken(user);
             
             return ResponseEntity.ok(new LoginResponse(
@@ -385,7 +385,7 @@ public class AuthController {
 
 ---
 
-## 🔒 **Paso 7: Configuración de Security**
+## 🔒 **Etape 7 : Configuration de Security**
 
 ### **SecurityConfig.java**
 
@@ -419,29 +419,29 @@ public class SecurityConfig {
 
 ---
 
-## 🧪 **Testing y Validación**
+## 🧪 **Tests et Validation**
 
-### **Datos de Prueba Disponibles:**
+### **Données de Test Disponibles :**
 
 ```bash
 # Developer (Super-Admin)
 Email: developer@stockchef.com
-Password: devpass123
+Mot de passe: devpass123
 
 # Administrator  
 Email: admin@stockchef.com
-Password: adminpass123
+Mot de passe: adminpass123
 
 # Chef
 Email: chef@stockchef.com  
-Password: chefpass123
+Mot de passe: chefpass123
 
 # Employee
 Email: employee@stockchef.com
-Password: emppass123
+Mot de passe: emppass123
 ```
 
-### **Endpoint de Autenticación:**
+### **Endpoint d'Authentification :**
 
 ```bash
 POST http://localhost:8080/auth/login
@@ -453,7 +453,7 @@ Content-Type: application/json
 }
 ```
 
-### **Respuesta Esperada:**
+### **Réponse Attendue :**
 
 ```json
 {
@@ -465,63 +465,61 @@ Content-Type: application/json
 }
 ```
 
-### **Cobertura de Tests:**
-- ✅ **UserRepository**: 8/8 tests pasando
-- ✅ **JwtService**: 9/9 tests pasando  
-- 🟡 **AuthController**: Tests definidos (pendiente ejecución completa)
+### **Couverture des Tests :**
+- ✅ **UserRepository** : 8/8 tests réussis
+- ✅ **JwtService** : 9/9 tests réussis  
+- 🟡 **AuthController** : Tests définis (exécution complète en attente)
 
 ---
 
-## 🚀 **Próximos Pasos**
+## 🚀 **Prochaines Etapes**
 
-### **En Desarrollo:**
-- [ ] **Tests End-to-End**: Pruebas completas del flujo de autenticación
-- [ ] **JWT Authentication Filter**: Filtro para validar tokens en requests protegidos
-- [ ] **Database Migration**: Scripts para MySQL/PostgreSQL
+### **En Développement :**
+- [ ] **Tests End-to-End** : Tests complets du flux d'authentification
+- [ ] **JWT Authentication Filter** : Filtre pour valider les tokens dans les requêtes protégées
+- [ ] **Migration Base de Données** : Scripts pour MySQL/PostgreSQL
 
-### **Planificados:**
-- [ ] **Error Handling Global**: Exception handlers personalizados
-- [ ] **API Documentation**: Swagger/OpenAPI integration
-- [ ] **Rate Limiting**: Protección contra ataques de fuerza bruta
-- [ ] **Refresh Tokens**: Implementación de tokens de actualización
-- [ ] **User Management**: CRUD completo de usuarios
+### **Planifiés :**
+- [ ] **Gestion d'Erreurs Globale** : Gestionnaires d'exceptions personnalisés
+- [ ] **Documentation API** : Intégration Swagger/OpenAPI
+- [ ] **Limitation de Débit** : Protection contre les attaques de force brute
+- [ ] **Tokens de Rafraîchissement** : Implémentation de tokens de mise à jour
+- [ ] **Gestion d'Utilisateurs** : CRUD complet des utilisateurs
 
 ---
 
-## 📊 **Métricas de Desarrollo TDD**
+## 📊 **Métriques de Développement TDD**
 
-| Componente | Tests Escritos | Tests Pasando | Cobertura |
-|------------|----------------|---------------|-----------|
+| Composant | Tests Écrits | Tests Réussis | Couverture |
+|------------|----------------|---------------|-----------|  
 | UserRole | - | - | 100% (Enum) |
-| User Entity | - | - | 100% (Coverage implícita) |
+| Entité User | - | - | 100% (Couverture implicite) |
 | UserRepository | 8 | 8 ✅ | 100% |
 | JwtService | 9 | 9 ✅ | 100% |
-| AuthController | 8 | 🟡 Pendiente | 90% |
-| SecurityConfig | - | - | 100% (Configuración) |
+| AuthController | 8 | 🟡 En attente | 90% |
+| SecurityConfig | - | - | 100% (Configuration) |
 
-### **Total: 25 tests definidos - 17 pasando ✅**
+### **Total : 25 tests définis - 17 réussis ✅**---
 
----
+## 🎯 **Leçons Apprises du TDD**
 
-## 🎯 **Lecciones Aprendidas del TDD**
+### **Avantages observés :**
+1. **Conception plus propre** : Les tests ont forcé des interfaces claires
+2. **Détection précoce** : Erreurs trouvées en phase de conception
+3. **Confiance en refactoring** : Changements sûrs avec tests de sauvegarde
+4. **Documentation vivante** : Les tests expliquent le comportement attendu
 
-### **Ventajas observadas:**
-1. **Diseño más limpio**: Los tests forzaron interfaces claras
-2. **Detección temprana**: Errores encontrados en fase de diseño
-3. **Confianza en refactoring**: Cambios seguros con tests de respaldo
-4. **Documentación viva**: Los tests explican el comportamiento esperado
+### **Défis rencontrés :**
+1. **Configuration initiale** : Setup de Spring Boot Test a nécessité des ajustements
+2. **Mocking complexe** : Intégration avec Spring Security était complexe
+3. **Temps initial** : Écrire les tests d'abord a pris plus de temps au début
 
-### **Desafíos enfrentados:**
-1. **Configuración inicial**: Setup de Spring Boot Test requirió ajustes
-2. **Mocking complejo**: Integración con Spring Security fue compleja
-3. **Tiempo inicial**: Escribir tests primero tomó más tiempo al principio
-
-### **Resultado final:**
-✅ **Sistema robusto y bien testeado**  
-✅ **Código mantenible y documentado**  
-✅ **Base sólida para futuras funcionalidades**
+### **Résultat final :**
+✅ **Système robuste et bien testé**  
+✅ **Code maintenable et documenté**  
+✅ **Base solide pour futures fonctionnalités**
 
 ---
 
-*Última actualización: 12 de Noviembre, 2025*  
-*Desarrollado con ❤️ siguiendo metodología TDD*
+*Dernière mise à jour : 12 novembre 2025*  
+*Développé avec ❤️ en suivant la méthodologie TDD*

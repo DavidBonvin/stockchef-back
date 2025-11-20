@@ -50,7 +50,7 @@ spring.datasource.hikari.validation-timeout=5000
 #### Configuration my.cnf Recommandée
 ```ini
 [mysqld]
-# Configuración básica para StockChef
+# Configuration de base pour StockChef
 innodb_buffer_pool_size = 256M
 innodb_log_file_size = 64M
 innodb_flush_log_at_trx_commit = 2
@@ -60,9 +60,9 @@ tmp_table_size = 64M
 max_heap_table_size = 64M
 ```
 
-## 🎛️ Configuración de Perfiles Avanzada
+## 🎛️ Configuration de Profils Avancée
 
-### Configuración por Entorno
+### Configuration par Environnement
 
 #### Desarrollo Local
 ```properties
@@ -128,31 +128,31 @@ services:
           memory: 512M
 ```
 
-### Variables de Entorno Seguras
+### Variables d'Environnement Sécurisées
 ```bash
 # .env.prod
 DATABASE_TYPE=mysql
 MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
 MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
 
-# Usar secrets en lugar de variables directas
+# Utiliser les secrets au lieu de variables directes
 ```
 
-## 🔧 Optimizaciones JVM
+## 🔧 Optimisations JVM
 
-### Configuración JVM Optimizada
+### Configuration JVM Optimisée
 ```bash
-# Para entornos de producción
+# Pour les environnements de production
 JAVA_OPTS="-Xmx2048m -Xms1024m -XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
 
-# Para desarrollo
+# Pour le développement
 JAVA_OPTS="-Xmx1024m -Xms512m -XX:+UseZGC -XX:+UnlockExperimentalVMOptions"
 
-# Para debugging
+# Pour le débogage
 JAVA_OPTS="-Xmx1024m -Xms512m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 ```
 
-## 📊 Monitoreo y Observabilidad
+## 📊 Monitoring et Observabilité
 
 ### Health Check Personalizado
 ```yaml
@@ -178,9 +178,9 @@ services:
         tag: "stockchef-backend"
 ```
 
-### Métricas con Prometheus
+### Métriques avec Prometheus
 ```yaml
-# Agregar a docker-compose.yml
+# Ajouter à docker-compose.yml
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -196,7 +196,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
 ```
 
-## 🔐 Configuración de Seguridad
+## 🔐 Configuration de Sécurité
 
 ### SSL/TLS con Traefik
 ```yaml

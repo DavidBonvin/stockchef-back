@@ -49,23 +49,23 @@ POST http://localhost:8090/api/auth/login
 
 ## 📋 **Versions Compatibles**
 
-| BD | Versión | Puerto |
+| BD | Version | Port |
 |----|---------|--------|
 | H2 | 2.3.232+ | N/A |
 | MySQL | 8.4+ | 3307 |
 | PostgreSQL | 15+ | 5432 |
 
-## 🆘 **Problemas Comunes**
+## 🆘 **Problèmes Communs**
 
 ```powershell
-# Java no encontrado
+# Java non trouvé
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-24"
 
-# Puerto ocupado
+# Port occupé
 netstat -ano | findstr :3307
 
-# Limpiar Docker
+# Nettoyer Docker
 docker system prune -f
 ```
 
-**📖 Documentación completa:** `docs/MULTI-DATABASE-SETUP.md`
+**📖 Documentation complète:** `docs/MULTI-DATABASE-SETUP.md`
