@@ -1,7 +1,7 @@
 package com.stockchef.stockchefback.exception;
 
 /**
- * Excepción para tokens JWT inválidos
+ * Exception pour tokens JWT invalides
  */
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException(String message) {

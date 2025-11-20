@@ -20,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Servicio principal de usuarios - Orquestador
+ * Service principal d'utilisateurs - Orchestrateur
  * 
- * Este servicio actúa como un facade que delega las operaciones
- * a los servicios especializados correspondientes.
+ * Ce service agit comme une facade qui délègue les opérations
+ * aux services spécialisés correspondants.
  * 
- * Organización modular:
- * - UserRegistrationService: Registro y creación de usuarios
- * - UserPasswordService: Gestión de contraseñas
- * - UserManagementService: CRUD y gestión general
- * - UserAuthorizationService: Autorización y roles
+ * Organisation modulaire:
+ * - UserRegistrationService: Inscription et création d'utilisateurs
+ * - UserPasswordService: Gestion des mots de passe
+ * - UserManagementService: CRUD et gestion générale
+ * - UserAuthorizationService: Autorisation et rôles
  */
 @Service
 @RequiredArgsConstructor
@@ -37,65 +37,65 @@ import java.util.List;
 @Transactional
 public class UserService {
 
-    // Servicios especializados
+    // Services spécialisés
     private final UserRegistrationService registrationService;
     private final UserPasswordService passwordService;
     private final UserManagementService managementService;
     private final UserAuthorizationService authorizationService;
 
     // =================
-    // REGISTRO DE USUARIOS
+    // INSCRIPTION D'UTILISATEURS
     // =================
 
     /**
-     * Registra un nuevo usuario con el rol EMPLOYEE por defecto
-     * Accesible públicamente
+     * Inscrit un nouvel utilisateur avec le rôle EMPLOYEE par défaut
+     * Accessible publiquement
      */
     public UserResponse registerNewUser(RegisterRequest request) {
         return registrationService.registerNewUser(request);
     }
 
     // =================
-    // GESTIÓN DE USUARIOS
+    // GESTION D'UTILISATEURS
     // =================
 
     /**
-     * Obtiene todos los usuarios
+     * Obtient tous les utilisateurs
      */
     public List<UserResponse> getAllUsers() {
         return managementService.getAllUsers();
     }
 
     /**
-     * Obtiene todos los usuarios con filtros
+     * Obtient tous les utilisateurs avec filtres
      */
     public List<UserResponse> getAllUsers(String currentUserEmail, String roleFilter, Boolean activeFilter) {
         return managementService.getAllUsers(currentUserEmail, roleFilter, activeFilter);
     }
 
     /**
-     * Obtiene un usuario por email
+     * Obtient un utilisateur par email
      */
     public UserResponse getUserByEmail(String email) {
         return managementService.getUserByEmail(email);
     }
 
     /**
-     * Obtiene un usuario por ID con verificación de permisos
+     * Obtient un utilisateur par ID avec vérification de permissions
      */
     public UserResponse getUserById(String userId, String currentUserEmail) {
         return managementService.getUserById(userId, currentUserEmail);
     }
 
     /**
-     * Actualiza la información de un usuario
+     * Met à jour les informations d'un utilisateur
      */
     public UserResponse updateUser(String userId, UpdateUserRequest request, String currentUserEmail) {
         return managementService.updateUser(userId, request, currentUserEmail);
     }
 
     /**
-     * Elimina un usuario
+     * Supprime un utilisateur
      */
     public void deleteUser(String userId, String currentUserEmail) {
         managementService.deleteUser(userId, currentUserEmail);

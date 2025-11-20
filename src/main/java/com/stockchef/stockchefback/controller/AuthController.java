@@ -94,43 +94,43 @@ public class AuthController {
     }
 
     /**
-     * Renovar token JWT
+     * Renouveler token JWT
      * POST /auth/refresh
      */
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        log.info("Solicitud de renovación de token recibida");
+        log.info("Demande de renouvellement de token reçue");
         
         try {
             TokenResponse response = authService.refreshToken(request);
-            log.info("Token renovado exitosamente");
+            log.info("Token renouvelé avec succès");
             return ResponseEntity.ok(response);
         } catch (InvalidTokenException e) {
-            log.warn("Intento de renovación con token inválido: {}", e.getMessage());
+            log.warn("Tentative de renouvellement avec token invalide: {}", e.getMessage());
             throw e;
         }
     }
 
     /**
-     * Invalidar token (logout)
+     * Invalider token (logout)
      * POST /auth/logout
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Intento de logout sin autenticación");
+            log.warn("Tentative de logout sans authentification");
             return ResponseEntity.status(403).build();
         }
 
         String userEmail = authentication.getName();
-        log.info("Logout solicitado para usuario: {}", userEmail);
+        log.info("Logout demandé pour utilisateur: {}", userEmail);
         
         try {
             authService.invalidateToken(userEmail);
-            log.info("Logout exitoso para usuario: {}", userEmail);
+            log.info("Logout réussi pour utilisateur: {}", userEmail);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Error durante logout para usuario {}: {}", userEmail, e.getMessage());
+            log.error("Erreur durant logout pour utilisateur {}: {}", userEmail, e.getMessage());
             throw e;
         }
     }

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Servicio para gestión de autenticación y tokens JWT
+ * Service pour gestion d'authentification et tokens JWT
  */
 @Service
 @RequiredArgsConstructor
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     /**
-     * DTO para respuesta de tokens
+     * DTO pour réponse de tokens
      */
     public static class TokenResponse {
         private final String accessToken;
@@ -42,21 +42,21 @@ public class AuthService {
     }
 
     /**
-     * Renovar token JWT usando refresh token
+     * Renouveler token JWT en utilisant refresh token
      */
     public TokenResponse refreshToken(RefreshTokenRequest request) {
-        log.info("Renovando token JWT con refresh token");
+        log.info("Renouvellement token JWT avec refresh token");
         
         if (request.refreshToken() == null || request.refreshToken().trim().isEmpty()) {
-            throw new InvalidTokenException("Refresh token no puede estar vacío");
+            throw new InvalidTokenException("Refresh token ne peut pas être vide");
         }
 
-        // Para los tests, simulamos un comportamiento básico
+        // Pour les tests, on simule un comportement basique
         if (request.refreshToken().contains("invalid")) {
-            throw new InvalidTokenException("Token inválido");
+            throw new InvalidTokenException("Token invalide");
         }
 
-        // Simulación de nueva respuesta de token para tests
+        // Simulation de nouvelle réponse de token pour tests
         return new TokenResponse(
                 "new-access-token-123",
                 "new-refresh-token-456", 
@@ -65,16 +65,16 @@ public class AuthService {
     }
 
     /**
-     * Invalidar token (logout)
+     * Invalider token (logout)
      */
     public void invalidateToken(String userEmail) {
-        log.info("Invalidando token para usuario: {}", userEmail);
+        log.info("Invalidation token pour utilisateur: {}", userEmail);
         
         if (userEmail == null || userEmail.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email de usuario requerido");
+            throw new IllegalArgumentException("Email d'utilisateur requis");
         }
 
-        // Para los tests, simplemente simulamos el proceso
-        log.info("Token invalidado exitosamente para: {}", userEmail);
+        // Pour les tests, on simule simplement le processus
+        log.info("Token invalidé avec succès pour: {}", userEmail);
     }
 }

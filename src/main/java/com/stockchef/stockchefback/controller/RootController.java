@@ -8,20 +8,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controlador para la raíz de la aplicación
+ * Contrôleur pour la racine de l'application
  */
 @RestController
 @CrossOrigin(origins = "*")
 public class RootController {
 
     /**
-     * Endpoint en la raíz para Railway health checks
+     * Endpoint à la racine pour les health checks de Railway
      */
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> root() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
-        response.put("message", "StockChef Backend API está funcionando");
+        response.put("message", "StockChef Backend API fonctionne");
         response.put("timestamp", LocalDateTime.now());
         response.put("api_docs", "/api/actuator");
         response.put("health_check", "/api/health");

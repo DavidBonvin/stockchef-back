@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Servicio especializado para el registro y creación de usuarios
+ * Service spécialisé pour l'inscription et création d'utilisateurs
  */
 @Service
 @RequiredArgsConstructor
@@ -27,26 +27,26 @@ public class UserRegistrationService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Registra un nuevo usuario con el rol EMPLOYEE por defecto
-     * Accesible públicamente
+     * Inscrit un nouvel utilisateur avec le rôle EMPLOYEE par défaut
+     * Accessible publiquement
      */
     public UserResponse registerNewUser(RegisterRequest request) {
         log.info("Tentative d'enregistrement pour email: {}", request.email());
 
-        // Verificar que el email no exista ya
+        // Vérifier que l'email n'existe pas déjà
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            log.warn("Tentative d'enregistrement avec email déjà existant: {}", request.email());
+            log.warn("Tentative d'inscription avec email déjà existant: {}", request.email());
             throw new EmailAlreadyExistsException("L'email " + request.email() + " est déjà utilisé");
         }
 
-        // Crear usuario
+        // Créer utilisateur
         User newUser = User.builder()
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(UserRole.ROLE_EMPLOYEE) // Rol por defecto
-                .isActive(true) // Activo por defecto
+                .role(UserRole.ROLE_EMPLOYEE) // Rôle par défaut
+                .isActive(true) // Actif par défaut
                 .createdAt(LocalDateTime.now())
                 .build();
 

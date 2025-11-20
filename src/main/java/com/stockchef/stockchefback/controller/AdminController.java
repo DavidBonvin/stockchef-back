@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador para la gestión administrativa de usuarios
- * Proporciona endpoints para administración de usuarios, roles y estado
- * Acceso restringido solo a usuarios con roles ADMIN o DEVELOPER
+ * Contrôleur pour la gestion administrative des utilisateurs
+ * Fournit des endpoints pour l'administration des utilisateurs, rôles et statut
+ * Accès restreint seulement aux utilisateurs avec rôles ADMIN ou DEVELOPER
  */
 @RestController
 @RequestMapping("/admin")

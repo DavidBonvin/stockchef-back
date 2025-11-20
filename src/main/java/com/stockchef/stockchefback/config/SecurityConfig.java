@@ -22,7 +22,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /**
-     * Configurar el encoder de passwords usando BCrypt
+     * Configurer l'encodeur de mots de passe utilisant BCrypt
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -32,32 +32,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // Deshabilitar CSRF para APIs REST
+            // Désactiver CSRF pour les APIs REST
             .csrf(csrf -> csrf.disable())
             
-            // Configurar autorización de requests
+            // Configurer l'autorisation des requests
             .authorizeHttpRequests(authz -> authz
-                // Permitir acceso sin autenticación a endpoints de auth
+                // Permettre l'accès sans authentification aux endpoints d'auth
                 .requestMatchers("/auth/**").permitAll()
-                // Permitir acceso público a registro de usuarios
+                // Permettre l'accès public à l'inscription d'utilisateurs
                 .requestMatchers("/users/register").permitAll()
-                // Permitir acceso público a forgot-password
+                // Permettre l'accès public à forgot-password
                 .requestMatchers("/users/forgot-password").permitAll()
-                // Permitir acceso a endpoints de health
+                // Permettre l'accès aux endpoints de health
                 .requestMatchers("/api/health", "/api/health/**").permitAll()
                 .requestMatchers("/health", "/health/**").permitAll()
-                // Permitir acceso a endpoints de Actuator
+                // Permettre l'accès aux endpoints d'Actuator
                 .requestMatchers("/actuator/**").permitAll()
-                // Todas las demás rutas requieren autenticación
+                // Toutes les autres routes nécessitent une authentification
                 .anyRequest().authenticated()
             )
             
-            // Configurar manejo de sesiones como STATELESS (para JWT)
+            // Configurer la gestion des sessions comme STATELESS (pour JWT)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             
-            // Agregar el filtro JWT antes del filtro de autenticación de usuario/contraseña
+            // Ajouter le filtre JWT avant le filtre d'authentification utilisateur/mot de passe
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

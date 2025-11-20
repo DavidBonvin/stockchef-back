@@ -1,5 +1,5 @@
 services:
-  # Aplicación Spring Boot
+  # Application Spring Boot
   stockchef-backend:
     build: .
     container_name: stockchef-backend
@@ -14,7 +14,7 @@ services:
     profiles:
       - app
 
-  # Base de datos MySQL
+  # Base de données MySQL
   mysql:
     image: mysql:8.4
     container_name: stockchef-mysql
@@ -38,7 +38,7 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # Base de datos PostgreSQL
+  # Base de données PostgreSQL
   postgres:
     image: postgres:18
     container_name: stockchef-postgres
@@ -61,7 +61,7 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # PHPMyAdmin (opcional para administración de MySQL)
+  # PHPMyAdmin (optionnel pour administration MySQL)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: stockchef-phpmyadmin
@@ -80,7 +80,7 @@ services:
     profiles:
       - tools
 
-  # pgAdmin (opcional para administración de PostgreSQL)
+  # pgAdmin (optionnel pour administration PostgreSQL)
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: stockchef-pgadmin

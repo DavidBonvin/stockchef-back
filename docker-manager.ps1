@@ -1,100 +1,100 @@
-# Script de PowerShell para gestionar el entorno Docker de StockChef
-# Uso: .\docker-manager.ps1 [comando] [opciones]
+# Script PowerShell pour gérer l'environnement Docker de StockChef
+# Usage: .\docker-manager.ps1 [commande] [options]
 
 param(
     [string]$Command = "help",
     [string]$Option = "mysql"
 )
 
-# Función para mostrar ayuda
+# Fonction pour afficher l'aide
 function Show-Help {
     Write-Host "StockChef Docker Manager" -ForegroundColor Blue
     Write-Host ""
-    Write-Host "Uso: .\docker-manager.ps1 [comando] [opciones]"
+    Write-Host "Usage: .\docker-manager.ps1 [commande] [options]"
     Write-Host ""
-    Write-Host "Comandos disponibles:"
-    Write-Host "  up [mysql|postgres]    - Iniciar el stack con la base de datos especificada" -ForegroundColor Green
-    Write-Host "  down                   - Parar y remover todos los contenedores" -ForegroundColor Green
-    Write-Host "  restart [mysql|postgres] - Reiniciar el stack" -ForegroundColor Green
-    Write-Host "  logs [servicio]        - Mostrar logs de un servicio específico" -ForegroundColor Green
-    Write-Host "  status                 - Mostrar estado de los servicios" -ForegroundColor Green
-    Write-Host "  clean                  - Limpiar volúmenes y contenedores" -ForegroundColor Green
-    Write-Host "  tools                  - Iniciar herramientas de administración" -ForegroundColor Green
-    Write-Host "  build                  - Reconstruir la imagen de la aplicación" -ForegroundColor Green
-    Write-Host "  help                   - Mostrar esta ayuda" -ForegroundColor Green
+    Write-Host "Commandes disponibles:"
+    Write-Host "  up [mysql|postgres]    - Démarrer le stack avec la base de données spécifiée" -ForegroundColor Green
+    Write-Host "  down                   - Arrêter et supprimer tous les conteneurs" -ForegroundColor Green
+    Write-Host "  restart [mysql|postgres] - Redémarrer le stack" -ForegroundColor Green
+    Write-Host "  logs [service]        - Afficher logs d'un service spécifique" -ForegroundColor Green
+    Write-Host "  status                 - Afficher état des services" -ForegroundColor Green
+    Write-Host "  clean                  - Nettoyer volumes et conteneurs" -ForegroundColor Green
+    Write-Host "  tools                  - Démarrer outils d'administration" -ForegroundColor Green
+    Write-Host "  build                  - Reconstruire l'image de l'application" -ForegroundColor Green
+    Write-Host "  help                   - Afficher cette aide" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Ejemplos:"
-    Write-Host "  .\docker-manager.ps1 up mysql           # Iniciar con MySQL" -ForegroundColor Yellow
-    Write-Host "  .\docker-manager.ps1 up postgres        # Iniciar con PostgreSQL" -ForegroundColor Yellow
-    Write-Host "  .\docker-manager.ps1 logs backend       # Ver logs del backend" -ForegroundColor Yellow
-    Write-Host "  .\docker-manager.ps1 tools              # Iniciar phpMyAdmin y pgAdmin" -ForegroundColor Yellow
+    Write-Host "Exemples:"
+    Write-Host "  .\docker-manager.ps1 up mysql           # Démarrer avec MySQL" -ForegroundColor Yellow
+    Write-Host "  .\docker-manager.ps1 up postgres        # Démarrer avec PostgreSQL" -ForegroundColor Yellow
+    Write-Host "  .\docker-manager.ps1 logs backend       # Voir logs du backend" -ForegroundColor Yellow
+    Write-Host "  .\docker-manager.ps1 tools              # Démarrer phpMyAdmin et pgAdmin" -ForegroundColor Yellow
 }
 
-# Función para configurar el entorno
+# Fonction pour configurer l'environnement
 function Setup-Environment {
     param([string]$DbType = "mysql")
     
     if (!(Test-Path ".env")) {
-        Write-Host "Creando archivo .env desde .env.example" -ForegroundColor Yellow
+        Write-Host "Création fichier .env depuis .env.example" -ForegroundColor Yellow
         Copy-Item ".env.example" ".env"
     }
     
     # Actualizar tipo de base de datos en .env
     (Get-Content ".env") -replace "DATABASE_TYPE=.*", "DATABASE_TYPE=$DbType" | Set-Content ".env"
     
-    Write-Host "Configurado para usar: $DbType" -ForegroundColor Green
+    Write-Host "Configuré pour utiliser: $DbType" -ForegroundColor Green
 }
 
-# Función para iniciar servicios
+# Fonction pour démarrer les services
 function Start-Services {
     param([string]$DbType = "mysql")
     
     Setup-Environment $DbType
     
-    Write-Host "Iniciando StockChef con $DbType..." -ForegroundColor Blue
+    Write-Host "Démarrage StockChef avec $DbType..." -ForegroundColor Blue
     
     switch ($DbType) {
         "mysql" {
-            Write-Host "Iniciando MySQL y backend..." -ForegroundColor Yellow
+            Write-Host "Démarrage MySQL et backend..." -ForegroundColor Yellow
             docker-compose up -d mysql
-            Start-Sleep -Seconds 20  # Esperar a que MySQL esté listo
+            Start-Sleep -Seconds 20  # Attendre que MySQL soit prêt
             docker-compose --profile app up -d stockchef-backend
         }
         "postgres" {
-            Write-Host "Iniciando PostgreSQL y backend..." -ForegroundColor Yellow
+            Write-Host "Démarrage PostgreSQL et backend..." -ForegroundColor Yellow
             docker-compose up -d postgres
-            Start-Sleep -Seconds 15  # Esperar a que PostgreSQL esté listo
+            Start-Sleep -Seconds 15  # Attendre que PostgreSQL soit prêt
             docker-compose --profile app up -d stockchef-backend
         }
         default {
-            Write-Host "Tipo de base de datos no válido: $DbType" -ForegroundColor Red
-            Write-Host "Usa: mysql o postgres"
+            Write-Host "Type de base de données non valide: $DbType" -ForegroundColor Red
+            Write-Host "Utilisez: mysql ou postgres"
             exit 1
         }
     }
     
-    Write-Host "Servicios iniciados exitosamente" -ForegroundColor Green
-    Write-Host "Backend disponible en: http://localhost:8090/api/health" -ForegroundColor Yellow
+    Write-Host "Services démarrés avec succès" -ForegroundColor Green
+    Write-Host "Backend disponible sur: http://localhost:8090/api/health" -ForegroundColor Yellow
     
     if ($DbType -eq "mysql") {
-        Write-Host "MySQL disponible en: localhost:3307" -ForegroundColor Yellow
+        Write-Host "MySQL disponible sur: localhost:3307" -ForegroundColor Yellow
     } else {
-        Write-Host "PostgreSQL disponible en: localhost:5433" -ForegroundColor Yellow
+        Write-Host "PostgreSQL disponible sur: localhost:5433" -ForegroundColor Yellow
     }
 }
 
-# Función para parar servicios
+# Fonction pour arrêter les services
 function Stop-Services {
-    Write-Host "Parando todos los servicios..." -ForegroundColor Yellow
+    Write-Host "Arrêt de tous les services..." -ForegroundColor Yellow
     docker-compose down
-    Write-Host "Servicios parados" -ForegroundColor Green
+    Write-Host "Services arrêtés" -ForegroundColor Green
 }
 
-# Función para reiniciar servicios
+# Fonction pour redémarrer les services
 function Restart-Services {
     param([string]$DbType = "mysql")
     
-    Write-Host "Reiniciando servicios..." -ForegroundColor Yellow
+    Write-Host "Redémarrage des services..." -ForegroundColor Yellow
     Stop-Services
     Start-Services $DbType
 }

@@ -50,34 +50,34 @@ public class UserController {
 
 
     /**
-     * Obtiene el perfil del usuario actualmente autenticado
-     * Extrae el email del JWT token y busca el usuario en la base de datos
+     * Obtient le profil de l'utilisateur actuellement authentifié
+     * Extrait l'email du token JWT et cherche l'utilisateur dans la base de données
      */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
-        log.info("Solicitud de perfil de usuario autenticado");
+        log.info("Demande de profil d'utilisateur authentifié");
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Usuario no autenticado intentando acceder al perfil");
+            log.warn("Utilisateur non authentifié tentant d'accéder au profil");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        // El email viene del JWT token en el campo 'username' de Spring Security
+        // L'email vient du token JWT dans le champ 'username' de Spring Security
         String email = authentication.getName();
-        log.info("Buscando perfil para email: {}", email);
+        log.info("Recherche profil pour email: {}", email);
         
         UserResponse userProfile = userService.getUserByEmail(email);
         
-        log.info("Perfil encontrado para usuario: {} (ID: {})", 
+        log.info("Profil trouvé pour utilisateur: {} (ID: {})", 
                 userProfile.email(), userProfile.id());
         
         return ResponseEntity.ok(userProfile);
     }
 
     /**
-     * Actualiza la información personal de un usuario
-     * - Todos los roles pueden modificar su propia información
-     * - DEVELOPER y ADMIN pueden modificar información de otros usuarios
+     * Met à jour les informations personnelles d'un utilisateur
+     * - Tous les rôles peuvent modifier leurs propres informations
+     * - DEVELOPER et ADMIN peuvent modifier les informations d'autres utilisateurs
      */
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(
@@ -85,25 +85,25 @@ public class UserController {
             @Valid @RequestBody UpdateUserRequest request,
             Authentication authentication) {
         
-        log.info("Solicitud de actualización para usuario ID: {} por {}", id, authentication.getName());
+        log.info("Demande de mise à jour pour utilisateur ID: {} par {}", id, authentication.getName());
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Usuario no autenticado intentando actualizar perfil");
+            log.warn("Utilisateur non authentifié tentant de mettre à jour profil");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
         String currentUserEmail = authentication.getName();
         UserResponse updatedUser = userService.updateUser(id, request, currentUserEmail);
         
-        log.info("Usuario actualizado exitosamente: {} (ID: {})", 
+        log.info("Utilisateur mis à jour avec succès: {} (ID: {})", 
                 updatedUser.email(), updatedUser.id());
         
         return ResponseEntity.ok(updatedUser);
     }
 
     /**
-     * Lista todos los usuarios del sistema con filtros opcionales
-     * Solo accesible para ADMIN y DEVELOPER
+     * Liste tous les utilisateurs du système avec filtres optionnels
+     * Seulement accessible pour ADMIN et DEVELOPER
      */
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers(
@@ -111,72 +111,72 @@ public class UserController {
             @RequestParam(required = false) Boolean active,
             Authentication authentication) {
         
-        log.info("Solicitud de lista de usuarios por {}", authentication.getName());
+        log.info("Demande de liste d'utilisateurs par {}", authentication.getName());
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Usuario no autenticado intentando listar usuarios");
+            log.warn("Utilisateur non authentifié tentant de lister les utilisateurs");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
         String currentUserEmail = authentication.getName();
         List<UserResponse> users = userService.getAllUsers(currentUserEmail, role, active);
         
-        log.info("Lista de usuarios devuelta exitosamente: {} usuarios", users.size());
+        log.info("Liste d'utilisateurs retournée avec succès: {} utilisateurs", users.size());
         
         return ResponseEntity.ok(users);
     }
 
     /**
-     * Obtiene un usuario específico por su ID
-     * - Usuarios pueden ver su propio perfil
-     * - ADMIN y DEVELOPER pueden ver cualquier perfil
+     * Obtient un utilisateur spécifique par son ID
+     * - Les utilisateurs peuvent voir leur propre profil
+     * - ADMIN et DEVELOPER peuvent voir n'importe quel profil
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(
             @PathVariable String id,
             Authentication authentication) {
         
-        log.info("Solicitud de usuario ID: {} por {}", id, authentication.getName());
+        log.info("Demande d'utilisateur ID: {} par {}", id, authentication.getName());
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Usuario no autenticado intentando obtener perfil");
+            log.warn("Utilisateur non authentifié tentant d'obtenir profil");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
         String currentUserEmail = authentication.getName();
         UserResponse user = userService.getUserById(id, currentUserEmail);
         
-        log.info("Usuario encontrado exitosamente: {} (ID: {})", user.email(), user.id());
+        log.info("Utilisateur trouvé avec succès: {} (ID: {})", user.email(), user.id());
         
         return ResponseEntity.ok(user);
     }
 
     /**
-     * Elimina (desactiva) un usuario del sistema
-     * Solo accesible para ADMIN
+     * Supprime (désactive) un utilisateur du système
+     * Seulement accessible pour ADMIN
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
             @PathVariable String id,
             Authentication authentication) {
         
-        log.info("Solicitud de eliminación de usuario ID: {} por {}", id, authentication.getName());
+        log.info("Demande de suppression d'utilisateur ID: {} par {}", id, authentication.getName());
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Usuario no autenticado intentando eliminar usuario");
+            log.warn("Utilisateur non authentifié tentant de supprimer utilisateur");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
         String currentUserEmail = authentication.getName();
         userService.deleteUser(id, currentUserEmail);
         
-        log.info("Usuario eliminado exitosamente: {}", id);
+        log.info("Utilisateur supprimé avec succès: {}", id);
         
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Cambio de contraseña de usuario específico (propio usuario + ADMIN)
+     * Changement de mot de passe d'utilisateur spécifique (propre utilisateur + ADMIN)
      * PUT /users/{id}/password
      */
     @PutMapping("/{id}/password")
@@ -192,12 +192,12 @@ public class UserController {
         String currentUserEmail = authentication.getName();
         userService.changeUserPassword(id, request, currentUserEmail);
         
-        log.info("Contraseña cambiada para usuario ID: {}", id);
+        log.info("Mot de passe changé pour utilisateur ID: {}", id);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Reset de contraseña (solo ADMIN)
+     * Reset de mot de passe (seulement ADMIN)
      * POST /users/{id}/reset-password
      */
     @PostMapping("/{id}/reset-password")
@@ -213,12 +213,12 @@ public class UserController {
         String currentUserEmail = authentication.getName();
         userService.resetUserPassword(id, request, currentUserEmail);
         
-        log.info("Contraseña reseteada para usuario ID: {} por admin", id);
+        log.info("Mot de passe reseté pour utilisateur ID: {} par admin", id);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Cambio de contraseña personal
+     * Changement de mot de passe personnel
      * POST /users/change-password
      */
     @PostMapping("/change-password")
@@ -233,26 +233,26 @@ public class UserController {
         String currentUserEmail = authentication.getName();
         userService.changePersonalPassword(currentUserEmail, request);
         
-        log.info("Contraseña personal cambiada para usuario: {}", currentUserEmail);
+        log.info("Mot de passe personnel changé pour utilisateur: {}", currentUserEmail);
         return ResponseEntity.ok().build();
     }
 
     /**
-     * Solicitar reset de contraseña
+     * Demander reset de mot de passe
      * POST /users/forgot-password
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        log.info("Solicitud de reset de contraseña para email: {}", request.email());
+        log.info("Demande de reset de mot de passe pour email: {}", request.email());
         
         try {
             userService.requestPasswordReset(request.email());
         } catch (UserNotFoundException e) {
-            // Por seguridad, no revelar si el email existe o no
-            log.warn("Solicitud de reset para email inexistente: {}", request.email());
+            // Pour la sécurité, ne pas révéler si l'email existe ou non
+            log.warn("Demande de reset pour email inexistant: {}", request.email());
         }
         
-        // Siempre devolver 200 por seguridad, aunque el email no exista
+        // Toujours retourner 200 pour la sécurité, même si l'email n'existe pas
         return ResponseEntity.ok().build();
     }
 }

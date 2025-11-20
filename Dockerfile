@@ -1,31 +1,31 @@
-# Usar una imagen base de OpenJDK 21 (compatible con 24)
+# Utiliser une image de base OpenJDK 21 (compatible avec 24)
 FROM eclipse-temurin:21-jdk-alpine
 
-# Instalar curl para health checks
+# Installer curl pour les vérifications de santé
 RUN apk add --no-cache curl
 
-# Establecer directorio de trabajo
+# Établir répertoire de travail
 WORKDIR /app
 
-# Copiar archivos de configuración de Maven
+# Copier fichiers de configuration Maven
 COPY pom.xml .
 COPY mvnw .
 COPY mvnw.cmd .
 COPY .mvn .mvn
 
-# Copiar código fuente
+# Copier code source
 COPY src src
 
-# Dar permisos de ejecución al wrapper de Maven
+# Donner permissions d'exécution au wrapper Maven
 RUN chmod +x mvnw
 
-# Construir la aplicación (usando el wrapper de Maven incluido)
+# Construire l'application (en utilisant le wrapper Maven inclus)
 RUN ./mvnw clean package -DskipTests
 
-# Exponer el puerto de la aplicación
+# Exposer le port de l'application
 EXPOSE 8090
 
-# Variables de entorno por defecto
+# Variables d'environnement par défaut
 ENV SPRING_PROFILES_ACTIVE=dev
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
@@ -33,5 +33,5 @@ ENV JAVA_OPTS="-Xmx512m -Xms256m"
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8090/api/actuator/health || exit 1
 
-# Ejecutar la aplicación
+# Exécuter l'application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar target/stockchef-back-*.jar"]

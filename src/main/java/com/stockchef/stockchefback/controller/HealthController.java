@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Controlador de salud para verificar el estado del backend
+ * Contrôleur de santé pour vérifier l'état du backend
  */
 @RestController
 @RequestMapping("/health")
@@ -16,19 +16,19 @@ import java.util.Map;
 public class HealthController {
 
     /**
-     * Endpoint simple para verificar que el backend está funcionando
-     * @return ResponseEntity con información del estado
+     * Endpoint simple pour vérifier que le backend fonctionne
+     * @return ResponseEntity avec informations de l'état
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
-        response.put("message", "StockChef Backend está funcionando correctamente");
+        response.put("message", "StockChef Backend fonctionne correctement");
         response.put("timestamp", LocalDateTime.now());
         response.put("version", "0.0.1-SNAPSHOT");
         response.put("service", "stockchef-back");
         
-        // Información del sistema para monitoreo
+        // Informations du système pour le monitoring
         response.put("server_port", System.getProperty("server.port"));
         response.put("port_env", System.getenv("PORT"));
         response.put("profile", System.getProperty("spring.profiles.active"));
@@ -37,14 +37,14 @@ public class HealthController {
     }
 
     /**
-     * Endpoint para información detallada del backend
-     * @return ResponseEntity con información detallada
+     * Endpoint pour informations détaillées du backend
+     * @return ResponseEntity avec informations détaillées
      */
     @GetMapping("/info")
     public ResponseEntity<Map<String, Object>> info() {
         Map<String, Object> response = new HashMap<>();
         response.put("application", "StockChef Backend");
-        response.put("description", "Sistema de gestión de inventario y stock");
+        response.put("description", "Système de gestion d'inventaire et stock");
         response.put("version", "0.0.1-SNAPSHOT");
         response.put("java.version", System.getProperty("java.version"));
         response.put("os.name", System.getProperty("os.name"));
@@ -54,7 +54,7 @@ public class HealthController {
     }
 
     /**
-     * Endpoint para verificar conectividad básica
+     * Endpoint pour vérifier la connectivité de base
      * @return String simple
      */
     @GetMapping("/ping")

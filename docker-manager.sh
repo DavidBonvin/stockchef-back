@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script para gestionar el entorno Docker de StockChef
-# Uso: ./docker-manager.sh [comando] [opciones]
+# Script pour gérer l'environnement Docker de StockChef
+# Usage: ./docker-manager.sh [commande] [options]
 
 set -e
 
@@ -12,36 +12,36 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Función para mostrar ayuda
+# Fonction pour afficher l'aide
 show_help() {
     echo -e "${BLUE}StockChef Docker Manager${NC}"
     echo ""
-    echo "Uso: $0 [comando] [opciones]"
+    echo "Usage: $0 [commande] [options]"
     echo ""
-    echo "Comandos disponibles:"
-    echo "  up [mysql|postgres]    - Iniciar el stack con la base de datos especificada"
-    echo "  down                   - Parar y remover todos los contenedores"
-    echo "  restart [mysql|postgres] - Reiniciar el stack"
-    echo "  logs [servicio]        - Mostrar logs de un servicio específico"
-    echo "  status                 - Mostrar estado de los servicios"
-    echo "  clean                  - Limpiar volúmenes y contenedores"
-    echo "  tools                  - Iniciar herramientas de administración"
-    echo "  build                  - Reconstruir la imagen de la aplicación"
-    echo "  help                   - Mostrar esta ayuda"
+    echo "Commandes disponibles:"
+    echo "  up [mysql|postgres]    - Démarrer le stack avec la base de données spécifiée"
+    echo "  down                   - Arrêter et supprimer tous les conteneurs"
+    echo "  restart [mysql|postgres] - Redémarrer le stack"
+    echo "  logs [service]        - Afficher logs d'un service spécifique"
+    echo "  status                 - Afficher état des services"
+    echo "  clean                  - Nettoyer volumes et conteneurs"
+    echo "  tools                  - Démarrer outils d'administration"
+    echo "  build                  - Reconstruire l'image de l'application"
+    echo "  help                   - Afficher cette aide"
     echo ""
-    echo "Ejemplos:"
-    echo "  $0 up mysql           # Iniciar con MySQL"
-    echo "  $0 up postgres        # Iniciar con PostgreSQL"
-    echo "  $0 logs backend       # Ver logs del backend"
-    echo "  $0 tools              # Iniciar phpMyAdmin y pgAdmin"
+    echo "Exemples:"
+    echo "  $0 up mysql           # Démarrer avec MySQL"
+    echo "  $0 up postgres        # Démarrer avec PostgreSQL"
+    echo "  $0 logs backend       # Voir logs du backend"
+    echo "  $0 tools              # Démarrer phpMyAdmin et pgAdmin"
 }
 
-# Función para configurar el entorno
+# Fonction pour configurer l'environnement
 setup_env() {
     local db_type=${1:-mysql}
     
     if [ ! -f .env ]; then
-        echo -e "${YELLOW}Creando archivo .env desde .env.example${NC}"
+        echo -e "${YELLOW}Création fichier .env depuis .env.example${NC}"
         cp .env.example .env
     fi
     

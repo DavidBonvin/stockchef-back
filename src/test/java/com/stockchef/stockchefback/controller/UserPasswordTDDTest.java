@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests TDD para endpoints de gestión de contraseñas y autenticación
  * 
  * Endpoints probados:
- * - PUT /users/{id}/password - Cambio de contraseña (propio usuario + ADMIN)
+ * - PUT /users/{id}/password - Changement mot de passe (propre utilisateur + ADMIN)
  * - POST /users/{id}/reset-password - Reset de contraseña (solo ADMIN)
  * - POST /auth/refresh - Renovar token JWT
  * - POST /auth/logout - Invalidar token (blacklist)
@@ -177,7 +177,7 @@ public class UserPasswordTDDTest {
         // GIVEN: DEVELOPER trying to reset password
         ResetPasswordRequest request = new ResetPasswordRequest("newPassword123!");
 
-        doThrow(new InsufficientPermissionsException("Solo los administradores pueden resetear contraseñas"))
+        doThrow(new InsufficientPermissionsException("Seuls les administrateurs peuvent réinitialiser les mots de passe"))
                 .when(userService).resetUserPassword(
                         eq(TestUuidHelper.EMPLOYEE_UUID), 
                         eq(request), 
@@ -327,7 +327,7 @@ public class UserPasswordTDDTest {
         // GIVEN: Non-existent email
         ForgotPasswordRequest request = new ForgotPasswordRequest("nonexistent@stockchef.com");
 
-        doThrow(new UserNotFoundException("Usuario no encontrado"))
+        doThrow(new UserNotFoundException("Utilisateur non trouvé"))
                 .when(userService).requestPasswordReset("nonexistent@stockchef.com");
 
         // WHEN & THEN: Should return 200 for security reasons

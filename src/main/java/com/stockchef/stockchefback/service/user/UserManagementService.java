@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Servicio especializado para la gestión y operaciones CRUD de usuarios
+ * Service spécialisé pour la gestion et opérations CRUD d'utilisateurs
  */
 @Service
 @RequiredArgsConstructor
@@ -29,21 +29,21 @@ public class UserManagementService {
     private final UserAuthorizationService authorizationService;
 
     /**
-     * Obtiene todos los usuarios (con filtros opcionales)
+     * Obtient tous les utilisateurs (avec filtres optionnels)
      */
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers(String currentUserEmail, String roleFilter, Boolean activeFilter) {
-        log.info("Solicitud de lista de usuarios por: {}, filtros - rol: {}, activo: {}", 
+        log.info("Demande de liste d'utilisateurs par: {}, filtres - rôle: {}, actif: {}", 
                 currentUserEmail, roleFilter, activeFilter);
 
-        // Verificar permisos - solo admins pueden ver listas filtradas
+        // Vérifier permissions - seuls les admins peuvent voir les listes filtrées
         if (!authorizationService.canViewFilteredLists(currentUserEmail)) {
-            throw new UnauthorizedUserException("No tienes permisos para ver la lista completa de usuarios");
+            throw new UnauthorizedUserException("Vous n'avez pas les permissions pour voir la liste complète d'utilisateurs");
         }
 
         List<User> users = userRepository.findAll();
 
-        // Aplicar filtros si se proporcionan
+        // Appliquer filtres si fournis
         if (roleFilter != null && !roleFilter.isEmpty()) {
             try {
                 UserRole role = UserRole.valueOf("ROLE_" + roleFilter.toUpperCase());
@@ -86,13 +86,13 @@ public class UserManagementService {
     public UserResponse getUserById(String userId, String currentUserEmail) {
         log.info("Solicitud de usuario ID: {} por usuario: {}", userId, currentUserEmail);
 
-        // Verificar permisos de acceso
+        // Vérifier permissions d'accès
         authorizationService.requireOwnershipOrAdmin(userId, currentUserEmail);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec ID: " + userId));
 
-        log.info("Usuario encontrado: {}", user.getEmail());
+        log.info("Utilisateur trouvé: {}", user.getEmail());
         return convertToUserResponse(user);
     }
 
@@ -101,12 +101,12 @@ public class UserManagementService {
      */
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
-        log.info("Buscando usuario por email: {}", email);
+        log.info("Recherche utilisateur par email: {}", email);
         
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec email: " + email));
         
-        log.info("Usuario encontrado por email: {}", email);
+        log.info("Utilisateur trouvé par email: {}", email);
         return convertToUserResponse(user);
     }
 
@@ -116,13 +116,13 @@ public class UserManagementService {
     public UserResponse updateUser(String userId, UpdateUserRequest request, String currentUserEmail) {
         log.info("Actualización de usuario ID: {} por usuario: {}", userId, currentUserEmail);
 
-        // Verificar permisos de modificación
+        // Vérifier permissions de modification
         authorizationService.requireModificationRights(userId, currentUserEmail);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec ID: " + userId));
 
-        // Actualizar campos proporcionados
+        // Mettre à jour champs fournis
         if (request.firstName() != null && !request.firstName().trim().isEmpty()) {
             user.setFirstName(request.firstName().trim());
         }
@@ -142,16 +142,16 @@ public class UserManagementService {
      * Actualiza el rol de un usuario
      */
     public UserResponse updateUserRole(String userId, UserRole newRole, String reason, User requester) {
-        log.info("Actualizando rol de usuario ID: {} a {} por usuario: {}, razón: {}", 
+        log.info("Mise à jour rôle utilisateur ID: {} vers {} par utilisateur: {}, raison: {}", 
                 userId, newRole, requester.getEmail(), reason);
 
         // Solo admins pueden cambiar roles
         if (requester.getRole() != UserRole.ROLE_ADMIN) {
-            throw new UnauthorizedUserException("Solo los administradores pueden cambiar roles de usuario");
+            throw new UnauthorizedUserException("Seuls les administrateurs peuvent changer les rôles d'utilisateur");
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec ID: " + userId));
 
         UserRole previousRole = user.getRole();
         user.setRole(newRole);
@@ -179,10 +179,10 @@ public class UserManagementService {
      * Actualiza el estado activo/inactivo de un usuario
      */
     public UserResponse updateUserStatus(String userId, Boolean active, String reason) {
-        log.info("Actualizando estado de usuario ID: {} a activo={}, razón: {}", userId, active, reason);
+        log.info("Mise à jour statut utilisateur ID: {} vers actif={}, raison: {}", userId, active, reason);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec ID: " + userId));
 
         Boolean previousStatus = user.getIsActive();
         user.setIsActive(active);
@@ -202,14 +202,14 @@ public class UserManagementService {
     public void deleteUser(String userId, String currentUserEmail) {
         log.info("Solicitud de eliminación de usuario ID: {} por usuario: {}", userId, currentUserEmail);
 
-        // Verificar permisos de eliminación
+        // Vérifier permissions de suppression
         authorizationService.requireDeleteRights(userId, currentUserEmail);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Utilisateur non trouvé avec ID: " + userId));
 
         userRepository.delete(user);
-        log.info("Usuario eliminado exitosamente: {} (ID: {})", user.getEmail(), userId);
+        log.info("Utilisateur supprimé avec succès: {} (ID: {})", user.getEmail(), userId);
     }
 
     /**

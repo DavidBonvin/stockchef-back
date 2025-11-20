@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Filtro JWT que intercepta todas las requests para verificar y procesar tokens JWT
- * Se ejecuta una vez por request para establecer la autenticación en SecurityContext
+ * Filtre JWT qui intercepte toutes les requests pour vérifier et traiter les tokens JWT
+ * S'exécute une fois par request pour établir l'authentification dans SecurityContext
  */
 @Component
 @RequiredArgsConstructor
@@ -38,53 +38,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // Si no hay header Authorization o no empieza con "Bearer ", continuar sin autenticación
+        // S'il n'y a pas de header Authorization ou ne commence pas par "Bearer ", continuer sans authentification
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            // Extraer el token JWT (remover "Bearer " del principio)
+            // Extraire le token JWT (supprimer "Bearer " du début)
             final String jwt = authHeader.substring(7);
-            log.debug("Token JWT extraído de la request: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
+            log.debug("Token JWT extrait de la request: {}", jwt.substring(0, Math.min(jwt.length(), 20)) + "...");
 
-            // Validar el token y extraer el email
+            // Valider le token et extraire l'email
             if (!jwtService.isTokenExpired(jwt)) {
                 String userEmail = jwtService.extractEmail(jwt);
-                log.debug("Token válido para usuario: {}", userEmail);
+                log.debug("Token valide pour utilisateur: {}", userEmail);
 
-                // Si no hay autenticación previa en el contexto
+                // S'il n'y a pas d'authentification préalable dans le contexte
                 if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     
-                    // Extraer el role del token para establecer las authorities
+                    // Extraire le rôle du token pour établir les authorities
                     String role = jwtService.extractRole(jwt);
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
-                    // Crear token de autenticación
+                    // Créer le token d'authentification
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userEmail, // Principal (username)
-                            null,      // Credentials (no needed for JWT)
+                            null,      // Credentials (not needed for JWT)
                             authorities // Authorities from token
                     );
 
-                    // Establecer detalles de la request
+                    // Établir les détails de la request
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    // Establecer autenticación en SecurityContext
+                    // Établir l'authentification dans SecurityContext
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     
-                    log.debug("Autenticación establecida para usuario: {} con role: {}", userEmail, role);
+                    log.debug("Authentification établie pour utilisateur: {} avec rôle: {}", userEmail, role);
                 }
             } else {
-                log.warn("Token JWT inválido o expirado");
+                log.warn("Token JWT invalide ou expiré");
             }
         } catch (Exception e) {
-            log.error("Error al procesar token JWT: {}", e.getMessage(), e);
-            // No lanzamos la excepción, solo logeamos y continuamos sin autenticación
+            log.error("Erreur lors du traitement du token JWT: {}", e.getMessage(), e);
+            // On ne lance pas l'exception, on logue seulement et on continue sans authentification
         }
 
-        // Continuar con la cadena de filtros
+        // Continuer avec la chaîne de filtres
         filterChain.doFilter(request, response);
     }
 }

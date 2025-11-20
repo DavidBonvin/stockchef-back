@@ -1,8 +1,8 @@
 package com.stockchef.stockchefback.exception;
 
 /**
- * Excepción lanzada cuando un usuario no tiene autorización para realizar una operación
- * específica sobre un recurso (diferente de la autenticación básica)
+ * Exception lancée lorsqu'un utilisateur n'a pas l'autorisation pour effectuer une opération
+ * spécifique sur une ressource (différent de l'authentification de base)
  */
 public class UnauthorizedUserException extends RuntimeException {
 

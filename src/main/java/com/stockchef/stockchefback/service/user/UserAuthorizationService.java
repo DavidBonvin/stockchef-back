@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Servicio especializado para autorización y gestión de roles
+ * Service spécialisé pour l'autorisation et gestion des rôles
  */
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class UserAuthorizationService {
     private final UserRepository userRepository;
 
     /**
-     * Verifica que el usuario actual tenga rol de ADMIN
+     * Vérifie que l'utilisateur actuel ait le rôle ADMIN
      */
     public void requireAdminRole(String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
@@ -38,18 +38,18 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Verifica que el usuario pueda acceder al recurso (propio recurso o admin)
+     * Vérifie que l'utilisateur puisse accéder à la ressource (propre ressource ou admin)
      */
     public void requireOwnershipOrAdmin(String targetUserId, String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UserNotFoundException("Usuario actual no encontrado"));
         
-        // Si es admin, puede acceder a todo
+        // Si c'est un admin, peut accéder à tout
         if (currentUser.getRole() == UserRole.ROLE_ADMIN) {
             return;
         }
         
-        // Si no es admin, solo puede acceder a su propio recurso
+        // Si ce n'est pas un admin, peut seulement accéder à sa propre ressource
         if (!currentUser.getId().equals(targetUserId)) {
             log.warn("Usuario {} intentó acceder al recurso de usuario {} sin permisos", 
                     currentUserEmail, targetUserId);
@@ -58,18 +58,18 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Verifica que el usuario pueda modificar el recurso (propio recurso o admin)
+     * Vérifie que l'utilisateur puisse modifier la ressource (propre ressource ou admin)
      */
     public void requireModificationRights(String targetUserId, String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UserNotFoundException("Usuario actual no encontrado"));
         
-        // Los admins pueden modificar a cualquiera
+        // Les admins peuvent modifier n'importe qui
         if (currentUser.getRole() == UserRole.ROLE_ADMIN) {
             return;
         }
         
-        // Los usuarios solo pueden modificarse a sí mismos
+        // Les utilisateurs peuvent seulement se modifier eux-mêmes
         if (!currentUser.getId().equals(targetUserId)) {
             log.warn("Usuario {} intentó modificar usuario {} sin permisos", 
                     currentUserEmail, targetUserId);
@@ -78,7 +78,7 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Obtiene el rol efectivo del usuario
+     * Obtient le rôle effectif de l'utilisateur
      */
     public UserRole getEffectiveRole(User user) {
         if (user == null || !user.getIsActive()) {
@@ -88,23 +88,23 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Verifica si el usuario puede eliminar a otro usuario
+     * Vérifie si l'utilisateur peut supprimer un autre utilisateur
      */
     public void requireDeleteRights(String targetUserId, String currentUserEmail) {
-        // Solo admins pueden eliminar usuarios
+        // Seuls les admins peuvent supprimer des utilisateurs
         requireAdminRole(currentUserEmail);
         
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UserNotFoundException("Usuario actual no encontrado"));
         
-        // Un admin no puede eliminarse a sí mismo
+        // Un admin ne peut pas se supprimer lui-même
         if (currentUser.getId().equals(targetUserId)) {
-            throw new InsufficientPermissionsException("No puedes eliminar tu propia cuenta");
+            throw new InsufficientPermissionsException("Vous ne pouvez pas supprimer votre propre compte");
         }
     }
 
     /**
-     * Actualiza el último login del usuario
+     * Met à jour la dernière connexion de l'utilisateur
      */
     @Transactional
     public void updateLastLogin(User user) {
@@ -114,7 +114,7 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Obtiene el usuario actual por email
+     * Obtient l'utilisateur actuel par email
      */
     public User getCurrentUser(String currentUserEmail) {
         return userRepository.findByEmail(currentUserEmail)
@@ -122,7 +122,7 @@ public class UserAuthorizationService {
     }
 
     /**
-     * Verifica si el usuario tiene permisos para ver listados filtrados
+     * Vérifie si l'utilisateur a les permissions pour voir les listes filtrées
      */
     public boolean canViewFilteredLists(String currentUserEmail) {
         User currentUser = getCurrentUser(currentUserEmail);

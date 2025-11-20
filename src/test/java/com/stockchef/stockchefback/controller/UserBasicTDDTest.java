@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Test TDD básico para el endpoint GET /users/me
- * Verifica que el endpoint devuelve la información correcta del usuario autenticado
+ * Vérifie que le endpoint retourne l'information correcte de l'utilisateur authentifié
  * 
  * ENFOQUE TDD:
  * 1. RED: Escribir test que falla
@@ -73,18 +73,18 @@ class UserBasicTDDTest {
     // ==================== RED TESTS (Fallan inicialmente) ====================
     
     @Test
-    @DisplayName("TDD RED: Debe devolver 403 cuando no hay autenticación")
+    @DisplayName("TDD RED: Doit retourner 403 quand il n'y a pas d'authentification")
     void test_step1_red_noAuthentication_returns401() throws Exception {
         // GIVEN: Sin autenticación
         
         // WHEN: Se llama al endpoint /users/me sin autenticación
-        // THEN: Debe devolver 403 Forbidden (comportamiento de Spring Security)
+        // THEN: Doit retourner 403 Forbidden (comportement de Spring Security)
         mockMvc.perform(get("/users/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isForbidden());
 
-        // Verificar que el servicio no fue llamado
+        // Vérifier que le service n'a pas été appelé
         verifyNoInteractions(userService);
     }
 
@@ -92,14 +92,14 @@ class UserBasicTDDTest {
     
     @Test
     @WithMockUser(username = "developer@stockchef.com", roles = {"DEVELOPER"})
-    @DisplayName("TDD GREEN: Debe devolver información del usuario cuando está autenticado")
+    @DisplayName("TDD GREEN: Doit retourner information utilisateur quand authentifié")
     void test_step2_green_authenticated_returnsUserInfo() throws Exception {
-        // GIVEN: Usuario autenticado y existente en la base de datos
+        // GIVEN: Utilisateur authentifié et existant dans la base de données
         when(userService.getUserByEmail("developer@stockchef.com"))
                 .thenReturn(expectedUserResponse);
 
-        // WHEN: Se llama al endpoint /users/me con usuario autenticado
-        // THEN: Debe devolver 200 con la información del usuario
+        // WHEN: On appelle le endpoint /users/me avec utilisateur authentifié
+        // THEN: Doit retourner 200 avec l'information de l'utilisateur
         mockMvc.perform(get("/users/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -112,7 +112,7 @@ class UserBasicTDDTest {
                 .andExpect(jsonPath("$.role").value("ROLE_DEVELOPER"))
                 .andExpect(jsonPath("$.isActive").value(true));
 
-        // Verificar que el servicio fue llamado correctamente
+        // Vérifier que le service a été appelé correctement
         verify(userService, times(1)).getUserByEmail("developer@stockchef.com");
     }
 
@@ -120,16 +120,16 @@ class UserBasicTDDTest {
     
     @Test
     @WithMockUser(username = "noexiste@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD REFACTOR: Debe devolver 404 cuando usuario no existe en BD")
+    @DisplayName("TDD REFACTOR: Doit retourner 404 quand utilisateur n'existe pas en BD")
     void test_step3_refactor_userNotFound_returns404() throws Exception {
-        // GIVEN: Usuario autenticado pero no existe en BD
+        // GIVEN: Utilisateur authentifié mais n'existe pas en BD
         String emailNoExistente = "noexiste@stockchef.com";
         
         when(userService.getUserByEmail(emailNoExistente))
-                .thenThrow(new UserNotFoundException("Usuario no encontrado con email: " + emailNoExistente));
+                .thenThrow(new UserNotFoundException("Utilisateur non trouvé avec email: " + emailNoExistente));
 
-        // WHEN: Se llama al endpoint con usuario inexistente
-        // THEN: Debe devolver 404
+        // WHEN: On appelle le endpoint avec utilisateur inexistant
+        // THEN: Doit retourner 404
         mockMvc.perform(get("/users/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -140,9 +140,9 @@ class UserBasicTDDTest {
 
     @Test
     @WithMockUser(username = "admin@stockchef.com", roles = {"ADMIN"})
-    @DisplayName("TDD REFACTOR: Debe funcionar para diferentes roles de usuario")
+    @DisplayName("TDD REFACTOR: Doit fonctionner pour différents rôles d'utilisateur")
     void test_step4_refactor_differentRoles_worksCorrectly() throws Exception {
-        // GIVEN: Usuario ADMIN
+        // GIVEN: Utilisateur ADMIN
         UserResponse adminResponse = new UserResponse(
                 TestUuidHelper.ADMIN_UUID,
                 "admin@stockchef.com",
@@ -159,8 +159,8 @@ class UserBasicTDDTest {
         when(userService.getUserByEmail("admin@stockchef.com"))
                 .thenReturn(adminResponse);
 
-        // WHEN: Se llama con usuario ADMIN autenticado
-        // THEN: Debe devolver información correcta del ADMIN
+        // WHEN: On appelle avec utilisateur ADMIN authentifié
+        // THEN: Doit retourner information correcte de l'ADMIN
         mockMvc.perform(get("/users/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

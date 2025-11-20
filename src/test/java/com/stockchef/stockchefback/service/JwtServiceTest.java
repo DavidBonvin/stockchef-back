@@ -38,7 +38,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe generar token JWT válido")
+    @DisplayName("Doit générer token JWT valide")
     void shouldGenerateValidJwtToken() {
         // When
         String token = jwtService.generateToken(testUser);
@@ -50,7 +50,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe extraer email del token")
+    @DisplayName("Doit extraire email du token")
     void shouldExtractEmailFromToken() {
         // Given
         String token = jwtService.generateToken(testUser);
@@ -63,7 +63,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe extraer rol del token")
+    @DisplayName("Doit extraire rôle du token")
     void shouldExtractRoleFromToken() {
         // Given
         String token = jwtService.generateToken(testUser);
@@ -76,7 +76,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe validar token correcto")
+    @DisplayName("Doit valider token correct")
     void shouldValidateCorrectToken() {
         // Given
         String token = jwtService.generateToken(testUser);
@@ -89,7 +89,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe rechazar token inválido")
+    @DisplayName("Doit rejeter token invalide")
     void shouldRejectInvalidToken() {
         // Given
         String invalidToken = "invalid.token.here";
@@ -102,7 +102,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe rechazar token para usuario diferente")
+    @DisplayName("Doit rejeter token pour utilisateur différent")
     void shouldRejectTokenForDifferentUser() {
         // Given
         String token = jwtService.generateToken(testUser);
@@ -121,7 +121,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe verificar que token no está expirado")
+    @DisplayName("Doit vérifier que token n'est pas expiré")
     void shouldVerifyTokenIsNotExpired() {
         // Given
         String token = jwtService.generateToken(testUser);
@@ -134,7 +134,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe generar tokens diferentes para diferentes usuarios")
+    @DisplayName("Doit générer tokens différents pour utilisateurs différents")
     void shouldGenerateDifferentTokensForDifferentUsers() {
         // Given
         User adminUser = User.builder()
@@ -150,7 +150,7 @@ class JwtServiceTest {
         // Then
         assertThat(tokenDeveloper).isNotEqualTo(tokenAdmin);
         
-        // Verificar que cada token contiene la información correcta
+        // Vérifier que chaque token contient l'information correcte
         assertThat(jwtService.extractEmail(tokenDeveloper)).isEqualTo("developer@stockchef.com");
         assertThat(jwtService.extractEmail(tokenAdmin)).isEqualTo("admin@stockchef.com");
         assertThat(jwtService.extractRole(tokenDeveloper)).isEqualTo("ROLE_DEVELOPER");
@@ -158,7 +158,7 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("Debe incluir claims adicionales en el token")
+    @DisplayName("Doit inclure claims additionnels dans le token")
     void shouldIncludeAdditionalClaimsInToken() {
         // Given
         String token = jwtService.generateToken(testUser);

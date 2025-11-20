@@ -57,7 +57,7 @@ class AuthControllerTest {
         // Limpiar datos
         userRepository.deleteAll();
 
-        // Crear usuarios de prueba
+        // Créer utilisateurs de test
         testDeveloper = createAndSaveUser(
                 "developer@stockchef.com", "devpass123",
                 "Super", "Admin", UserRole.ROLE_DEVELOPER
@@ -80,7 +80,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe autenticar developer exitosamente")
+    @DisplayName("POST /auth/login - Doit authentifier developer avec succès")
     void shouldAuthenticateDeveloperSuccessfully() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest(
@@ -101,7 +101,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.expiresIn").exists())
                 .andReturn();
 
-        // Verificar que el token sea válido
+        // Vérifier que le token soit valide
         LoginResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 LoginResponse.class
@@ -113,7 +113,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe autenticar admin exitosamente")
+    @DisplayName("POST /auth/login - Doit authentifier admin avec succès")
     void shouldAuthenticateAdminSuccessfully() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest(
@@ -133,7 +133,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe autenticar chef exitosamente")
+    @DisplayName("POST /auth/login - Doit authentifier chef avec succès")
     void shouldAuthenticateChefSuccessfully() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest(
@@ -150,7 +150,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe autenticar employee exitosamente")
+    @DisplayName("POST /auth/login - Doit authentifier employee avec succès")
     void shouldAuthenticateEmployeeSuccessfully() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest(
@@ -167,7 +167,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe rechazar credenciales inválidas")
+    @DisplayName("POST /auth/login - Doit rejeter identifiants invalides")
     void shouldRejectInvalidCredentials() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest(
@@ -227,9 +227,9 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe rechazar usuario inactivo")
+    @DisplayName("POST /auth/login - Doit rejeter utilisateur inactif")
     void shouldRejectInactiveUser() throws Exception {
-        // Given - crear usuario inactivo
+        // Given - créer utilisateur inactif
         User inactiveUser = User.builder()
                 .email("inactive@stockchef.com")
                 .password(passwordEncoder.encode("password123"))

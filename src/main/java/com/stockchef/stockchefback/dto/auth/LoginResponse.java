@@ -3,7 +3,7 @@ package com.stockchef.stockchefback.dto.auth;
 import com.stockchef.stockchefback.model.UserRole;
 
 /**
- * Response DTO para autenticación exitosa
+ * Response DTO pour authentification réussie
  */
 public record LoginResponse(
         String token,

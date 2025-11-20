@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Cubre los endpoints:
  * - GET /users (listar con filtros)
  * - GET /users/{id} (obtener por ID)
- * - DELETE /users/{id} (eliminar/desactivar)
+ * - DELETE /users/{id} (supprimer/désactiver)
  * - PUT /users/{id}/role (cambiar rol)
  * - PUT /users/{id}/status (cambiar estado)
  */
@@ -113,7 +113,7 @@ class UserCrudTDDTest {
     // ==================== GET /users Tests ====================
 
     @Test
-    @DisplayName("TDD RED: Sin autenticación debe devolver 403 en GET /users")
+    @DisplayName("TDD RED: Sans authentification doit retourner 403 en GET /users")
     void getAllUsers_WhenNotAuthenticated_ShouldReturn403() throws Exception {
         // GIVEN: Sin autenticación
 
@@ -146,13 +146,13 @@ class UserCrudTDDTest {
 
     @Test
     @WithMockUser(username = "chef@stockchef.com", roles = {"CHEF"})
-    @DisplayName("TDD RED: CHEF no puede listar usuarios")
+    @DisplayName("TDD RED: CHEF ne peut pas lister utilisateurs")
     void getAllUsers_WhenChef_ShouldReturn403() throws Exception {
-        // GIVEN: Usuario CHEF intentando listar usuarios
+        // GIVEN: Utilisateur CHEF essayant lister utilisateurs
         when(userService.getAllUsers(eq("chef@stockchef.com"), any(), any()))
                 .thenThrow(new InsufficientPermissionsException("No tienes permisos para listar usuarios"));
 
-        // WHEN: CHEF intenta listar usuarios
+        // WHEN: CHEF essaie lister utilisateurs
         // THEN: Debe devolver 403 Forbidden
         mockMvc.perform(get("/users"))
                 .andDo(print())
@@ -260,7 +260,7 @@ class UserCrudTDDTest {
     // ==================== GET /users/{id} Tests ====================
 
     @Test
-    @DisplayName("TDD RED: Sin autenticación debe devolver 403 en GET /users/{id}")
+    @DisplayName("TDD RED: Sans authentification doit retourner 403 en GET /users/{id}")
     void getUserById_WhenNotAuthenticated_ShouldReturn403() throws Exception {
         // GIVEN: Sin autenticación
 
@@ -335,7 +335,7 @@ class UserCrudTDDTest {
     // ==================== DELETE /users/{id} Tests ====================
 
     @Test
-    @DisplayName("TDD RED: Sin autenticación debe devolver 403 en DELETE /users/{id}")
+    @DisplayName("TDD RED: Sans authentification doit retourner 403 en DELETE /users/{id}")
     void deleteUser_WhenNotAuthenticated_ShouldReturn403() throws Exception {
         // GIVEN: Sin autenticación
 
@@ -350,13 +350,13 @@ class UserCrudTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD RED: EMPLOYEE no puede eliminar usuarios")
+    @DisplayName("TDD RED: EMPLOYEE ne peut pas supprimer utilisateurs")
     void deleteUser_WhenEmployee_ShouldReturn403() throws Exception {
-        // GIVEN: EMPLOYEE intentando eliminar usuario
-        doThrow(new InsufficientPermissionsException("No tienes permisos para eliminar usuarios"))
+        // GIVEN: EMPLOYEE essayant supprimer utilisateur
+        doThrow(new InsufficientPermissionsException("Vous n'avez pas les permissions pour supprimer les utilisateurs"))
                 .when(userService).deleteUser(eq(TestUuidHelper.ADMIN_UUID), eq("employee@stockchef.com"));
 
-        // WHEN: EMPLOYEE intenta eliminar usuario
+        // WHEN: EMPLOYEE essaie supprimer utilisateur
         // THEN: Debe devolver 403 Forbidden
         mockMvc.perform(delete("/users/{id}", TestUuidHelper.ADMIN_UUID))
                 .andDo(print())
@@ -368,13 +368,13 @@ class UserCrudTDDTest {
 
     @Test
     @WithMockUser(username = "developer@stockchef.com", roles = {"DEVELOPER"})
-    @DisplayName("TDD RED: DEVELOPER no puede eliminar usuarios")
+    @DisplayName("TDD RED: DEVELOPER ne peut pas supprimer utilisateurs")
     void deleteUser_WhenDeveloper_ShouldReturn403() throws Exception {
-        // GIVEN: DEVELOPER intentando eliminar usuario
-        doThrow(new InsufficientPermissionsException("Solo ADMIN puede eliminar usuarios"))
+        // GIVEN: DEVELOPER essayant supprimer utilisateur
+        doThrow(new InsufficientPermissionsException("Seul ADMIN peut supprimer les utilisateurs"))
                 .when(userService).deleteUser(eq(TestUuidHelper.EMPLOYEE_UUID), eq("developer@stockchef.com"));
 
-        // WHEN: DEVELOPER intenta eliminar usuario
+        // WHEN: DEVELOPER essaie supprimer utilisateur
         // THEN: Debe devolver 403 Forbidden
         mockMvc.perform(delete("/users/{id}", TestUuidHelper.EMPLOYEE_UUID))
                 .andDo(print())
@@ -386,7 +386,7 @@ class UserCrudTDDTest {
 
     @Test
     @WithMockUser(username = "admin@stockchef.com", roles = {"ADMIN"})
-    @DisplayName("TDD GREEN: ADMIN puede eliminar usuarios")
+    @DisplayName("TDD GREEN: ADMIN peut supprimer utilisateurs")
     void deleteUser_WhenAdmin_ShouldReturn204() throws Exception {
         // GIVEN: ADMIN eliminando usuario EMPLOYEE
         doNothing().when(userService)
@@ -404,15 +404,15 @@ class UserCrudTDDTest {
 
     @Test
     @WithMockUser(username = "admin@stockchef.com", roles = {"ADMIN"})
-    @DisplayName("TDD RED: No se puede eliminar usuario inexistente")
+    @DisplayName("TDD RED: Ne peut pas supprimer utilisateur inexistant")
     void deleteUser_WhenUserNotFound_ShouldReturn404() throws Exception {
         // GIVEN: Usuario inexistente
         String nonExistentUserId = "non-existent-uuid";
-        doThrow(new UserNotFoundException("Usuario no encontrado"))
+        doThrow(new UserNotFoundException("Utilisateur non trouvé"))
                 .when(userService)
                 .deleteUser(eq(nonExistentUserId), eq("admin@stockchef.com"));
 
-        // WHEN: Se intenta eliminar usuario inexistente
+        // WHEN: On essaie supprimer utilisateur inexistant
         // THEN: Debe devolver 404 Not Found
         mockMvc.perform(delete("/users/{id}", nonExistentUserId))
                 .andDo(print())

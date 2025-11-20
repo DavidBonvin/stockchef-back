@@ -1,7 +1,7 @@
 package com.stockchef.stockchefback.exception;
 
 /**
- * Excepción para contraseñas inválidas
+ * Exception pour mots de passe invalides
  */
 public class InvalidPasswordException extends RuntimeException {
     public InvalidPasswordException(String message) {

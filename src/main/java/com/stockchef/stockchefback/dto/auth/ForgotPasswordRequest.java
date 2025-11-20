@@ -4,11 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * DTO para solicitud de recuperación de contraseña
+ * DTO pour demande de récupération de mot de passe
  */
 public record ForgotPasswordRequest(
-        @NotBlank(message = "El email es obligatorio")
-        @Email(message = "Formato de email inválido")
+        @NotBlank(message = "L'email est obligatoire")
+        @Email(message = "Format d'email invalide")
         String email
 ) {
 }

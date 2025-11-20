@@ -4,17 +4,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * DTO para cambio de contraseña
+ * DTO pour changement de mot de passe
  */
 public record ChangePasswordRequest(
-        @NotBlank(message = "La contraseña actual es obligatoria")
+        @NotBlank(message = "Le mot de passe actuel est obligatoire")
         String currentPassword,
         
-        @NotBlank(message = "La nueva contraseña es obligatoria")
-        @Size(min = 8, max = 100, message = "La nueva contraseña debe tener entre 8 y 100 caracteres")
+        @NotBlank(message = "Le nouveau mot de passe est obligatoire")
+        @Size(min = 8, max = 100, message = "Le nouveau mot de passe doit contenir entre 8 et 100 caractères")
         String newPassword,
         
-        @NotBlank(message = "La confirmación de contraseña es obligatoria")
+        @NotBlank(message = "La confirmation de mot de passe est obligatoire")
         String confirmPassword
 ) {
     // Validation moved to service layer to avoid constructor issues in tests

@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Servicio temporal para manejar usuarios en memoria
- * Reemplaza la funcionalidad de JPA mientras solucionamos los problemas de configuración
+ * Service temporaire pour gérer les utilisateurs en mémoire
+ * Remplace la fonctionnalité de JPA pendant qu'on résout les problèmes de configuration
  */
 @Service
 @RequiredArgsConstructor
@@ -25,13 +25,13 @@ public class InMemoryUserService {
     private final Map<String, User> users = new HashMap<>();
 
     /**
-     * Inicializar usuarios por defecto
+     * Initialiser les utilisateurs par défaut
      */
     public void initializeDefaultUsers() {
         if (users.isEmpty()) {
-            log.info("Inicializando usuarios en memoria...");
+            log.info("Initialisation des utilisateurs en mémoire...");
 
-            // Usuario Developer (Super-Admin)
+            // Utilisateur Developer (Super-Admin)
             User developer = createUser(
                 1L, 
                 "developer@stockchef.com", 
@@ -42,7 +42,7 @@ public class InMemoryUserService {
             );
             users.put(developer.getEmail(), developer);
 
-            // Usuario Admin
+            // Utilisateur Admin
             User admin = createUser(
                 2L, 
                 "admin@stockchef.com", 
@@ -53,7 +53,7 @@ public class InMemoryUserService {
             );
             users.put(admin.getEmail(), admin);
 
-            // Usuario Chef
+            // Utilisateur Chef
             User chef = createUser(
                 3L, 
                 "chef@stockchef.com", 
@@ -64,7 +64,7 @@ public class InMemoryUserService {
             );
             users.put(chef.getEmail(), chef);
 
-            // Usuario Employee
+            // Utilisateur Employee
             User employee = createUser(
                 4L, 
                 "employee@stockchef.com", 
@@ -75,12 +75,12 @@ public class InMemoryUserService {
             );
             users.put(employee.getEmail(), employee);
 
-            log.info("Usuarios inicializados: {}", users.keySet());
+            log.info("Utilisateurs initialisés: {}", users.keySet());
         }
     }
 
     /**
-     * Buscar usuario por email
+     * Rechercher utilisateur par email
      */
     public Optional<User> findByEmail(String email) {
         initializeDefaultUsers();
@@ -88,7 +88,7 @@ public class InMemoryUserService {
     }
 
     /**
-     * Verificar si existe usuario por email
+     * Vérifier si utilisateur existe par email
      */
     public boolean existsByEmail(String email) {
         initializeDefaultUsers();
@@ -96,7 +96,7 @@ public class InMemoryUserService {
     }
 
     /**
-     * Crear usuario helper
+     * Créer utilisateur helper
      */
     private User createUser(Long id, String email, String password, String firstName, String lastName, UserRole role) {
         return User.builder()
@@ -113,7 +113,7 @@ public class InMemoryUserService {
     }
 
     /**
-     * Obtiene todos los usuarios para administración
+     * Obtient tous les utilisateurs pour administration
      */
     public Map<String, User> getAllUsers() {
         initializeDefaultUsers();

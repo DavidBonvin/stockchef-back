@@ -33,11 +33,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Test TDD para la modificación de información de usuarios
+ * Test TDD pour la modification d'information d'utilisateurs
  * Verifica las reglas de autorización:
- * - Todos los roles pueden modificar su propia información
- * - DEVELOPER y ADMIN pueden modificar información de otros usuarios
- * - EMPLOYEE y CHEF solo pueden modificar su propia información
+ * - Tous les rôles peuvent modifier leur propre information
+ * - DEVELOPER et ADMIN peuvent modifier information d'autres utilisateurs
+ * - EMPLOYEE et CHEF peuvent seulement modifier leur propre information
  */
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -87,12 +87,12 @@ class UserUpdateTDDTest {
     // ==================== RED TESTS (Casos de error) ====================
 
     @Test
-    @DisplayName("TDD RED: Debe devolver 403 cuando no hay autenticación")
+    @DisplayName("TDD RED: Doit retourner 403 quand il n'y a pas d'authentification")
     void shouldReturn403_WhenNotAuthenticated() throws Exception {
         // GIVEN: Sin autenticación
         
-        // WHEN: Se intenta actualizar un usuario sin autenticación
-        // THEN: Debe devolver 403 Forbidden (comportamiento de Spring Security)
+        // WHEN: On essaie de mettre à jour un utilisateur sans authentification
+        // THEN: Doit retourner 403 Forbidden (comportement de Spring Security)
         mockMvc.perform(put("/users/{id}", TestUuidHelper.EMPLOYEE_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
@@ -104,13 +104,13 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD RED: EMPLOYEE no puede modificar información de otros usuarios")
+    @DisplayName("TDD RED: EMPLOYEE ne peut pas modifier information d'autres utilisateurs")
     void shouldReturn403_WhenEmployeeTryToUpdateOtherUser() throws Exception {
-        // GIVEN: Usuario EMPLOYEE intentando modificar otro usuario
+        // GIVEN: Utilisateur EMPLOYEE essayant modifier autre utilisateur
         when(userService.updateUser(eq(TestUuidHelper.ADMIN_UUID), any(UpdateUserRequest.class), eq("employee@stockchef.com")))
-                .thenThrow(new UnauthorizedUserException("No tienes permisos para modificar este usuario"));
+                .thenThrow(new UnauthorizedUserException("Vous n'avez pas les permissions pour modifier cet utilisateur"));
 
-        // WHEN: EMPLOYEE intenta modificar información de ADMIN
+        // WHEN: EMPLOYEE essaie modifier information d'ADMIN
         // THEN: Debe devolver 403 Forbidden
         mockMvc.perform(put("/users/{id}", TestUuidHelper.ADMIN_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,13 +124,13 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "chef@stockchef.com", roles = {"CHEF"})
-    @DisplayName("TDD RED: CHEF no puede modificar información de otros usuarios")
+    @DisplayName("TDD RED: CHEF ne peut pas modifier information d'autres utilisateurs")
     void shouldReturn403_WhenChefTryToUpdateOtherUser() throws Exception {
-        // GIVEN: Usuario CHEF intentando modificar otro usuario
+        // GIVEN: Utilisateur CHEF essayant modifier autre utilisateur
         when(userService.updateUser(eq(TestUuidHelper.DEVELOPER_UUID), any(UpdateUserRequest.class), eq("chef@stockchef.com")))
-                .thenThrow(new UnauthorizedUserException("No tienes permisos para modificar este usuario"));
+                .thenThrow(new UnauthorizedUserException("Vous n'avez pas les permissions pour modifier cet utilisateur"));
 
-        // WHEN: CHEF intenta modificar información de DEVELOPER
+        // WHEN: CHEF essaie modifier information de DEVELOPER
         // THEN: Debe devolver 403 Forbidden
         mockMvc.perform(put("/users/{id}", TestUuidHelper.DEVELOPER_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,15 +144,15 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD RED: Debe devolver 404 cuando usuario no existe")
+    @DisplayName("TDD RED: Doit retourner 404 quand utilisateur n'existe pas")
     void shouldReturn404_WhenUserNotFound() throws Exception {
-        // GIVEN: Usuario que no existe
+        // GIVEN: Utilisateur qui n'existe pas
         String nonExistentUserId = "non-existent-uuid";
         when(userService.updateUser(eq(nonExistentUserId), any(UpdateUserRequest.class), eq("employee@stockchef.com")))
-                .thenThrow(new UserNotFoundException("Usuario no encontrado"));
+                .thenThrow(new UserNotFoundException("Utilisateur non trouvé"));
 
-        // WHEN: Se intenta actualizar usuario inexistente
-        // THEN: Debe devolver 404
+        // WHEN: On essaie de mettre à jour utilisateur inexistant
+        // THEN: Doit retourner 404
         mockMvc.perform(put("/users/{id}", nonExistentUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
@@ -165,7 +165,7 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD RED: Debe devolver 409 cuando email ya existe")
+    @DisplayName("TDD RED: Doit retourner 409 quand email existe déjà")
     void shouldReturn409_WhenEmailAlreadyExists() throws Exception {
         // GIVEN: Email que ya está en uso
         UpdateUserRequest duplicateEmailRequest = new UpdateUserRequest(
@@ -177,8 +177,8 @@ class UserUpdateTDDTest {
         when(userService.updateUser(eq(TestUuidHelper.EMPLOYEE_UUID), any(UpdateUserRequest.class), eq("employee@stockchef.com")))
                 .thenThrow(new EmailAlreadyExistsException("El email ya está en uso"));
 
-        // WHEN: Se intenta actualizar con email duplicado
-        // THEN: Debe devolver 409 Conflict
+        // WHEN: On essaie de mettre à jour avec email dupliqué
+        // THEN: Doit retourner 409 Conflict
         mockMvc.perform(put("/users/{id}", TestUuidHelper.EMPLOYEE_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicateEmailRequest)))
@@ -191,7 +191,7 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD RED: Debe devolver 400 cuando datos son inválidos")
+    @DisplayName("TDD RED: Doit retourner 400 quand données sont invalides")
     void shouldReturn400_WhenInvalidData() throws Exception {
         // GIVEN: Datos inválidos (email mal formateado)
         UpdateUserRequest invalidRequest = new UpdateUserRequest(
@@ -201,7 +201,7 @@ class UserUpdateTDDTest {
         );
 
         // WHEN: Se envían datos inválidos
-        // THEN: Debe devolver 400 Bad Request
+        // THEN: Doit retourner 400 Bad Request
         mockMvc.perform(put("/users/{id}", TestUuidHelper.EMPLOYEE_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
@@ -215,14 +215,14 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "employee@stockchef.com", roles = {"EMPLOYEE"})
-    @DisplayName("TDD GREEN: EMPLOYEE puede modificar su propia información")
+    @DisplayName("TDD GREEN: EMPLOYEE peut modifier sa propre information")
     void shouldReturn200_WhenEmployeeUpdatesOwnInfo() throws Exception {
-        // GIVEN: Usuario EMPLOYEE modificando su propia información
+        // GIVEN: Utilisateur EMPLOYEE modifiant sa propre information
         when(userService.updateUser(eq(TestUuidHelper.EMPLOYEE_UUID), any(UpdateUserRequest.class), eq("employee@stockchef.com")))
                 .thenReturn(updatedUserResponse);
 
-        // WHEN: EMPLOYEE actualiza su propia información
-        // THEN: Debe devolver 200 con información actualizada
+        // WHEN: EMPLOYEE met à jour sa propre information
+        // THEN: Doit retourner 200 avec information mise à jour
         mockMvc.perform(put("/users/{id}", TestUuidHelper.EMPLOYEE_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
@@ -241,7 +241,7 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "chef@stockchef.com", roles = {"CHEF"})
-    @DisplayName("TDD GREEN: CHEF puede modificar su propia información")
+    @DisplayName("TDD GREEN: CHEF peut modifier sa propre information")
     void shouldReturn200_WhenChefUpdatesOwnInfo() throws Exception {
         // GIVEN: Usuario CHEF modificando su propia información
         UserResponse chefUpdatedResponse = new UserResponse(
@@ -266,8 +266,8 @@ class UserUpdateTDDTest {
                 "nuevo.chef@stockchef.com"
         );
 
-        // WHEN: CHEF actualiza su propia información
-        // THEN: Debe devolver 200 con información actualizada
+        // WHEN: CHEF met à jour sa propre information
+        // THEN: Doit retourner 200 avec information mise à jour
         mockMvc.perform(put("/users/{id}", TestUuidHelper.CHEF_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(chefUpdateRequest)))
@@ -283,14 +283,14 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "developer@stockchef.com", roles = {"DEVELOPER"})
-    @DisplayName("TDD GREEN: DEVELOPER puede modificar información de otros usuarios")
+    @DisplayName("TDD GREEN: DEVELOPER peut modifier information d'autres utilisateurs")
     void shouldReturn200_WhenDeveloperUpdatesOtherUser() throws Exception {
         // GIVEN: Usuario DEVELOPER modificando información de EMPLOYEE
         when(userService.updateUser(eq(TestUuidHelper.EMPLOYEE_UUID), any(UpdateUserRequest.class), eq("developer@stockchef.com")))
                 .thenReturn(updatedUserResponse);
 
-        // WHEN: DEVELOPER actualiza información de EMPLOYEE
-        // THEN: Debe devolver 200 con información actualizada
+        // WHEN: DEVELOPER met à jour information d'EMPLOYEE
+        // THEN: Doit retourner 200 avec information mise à jour
         mockMvc.perform(put("/users/{id}", TestUuidHelper.EMPLOYEE_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
@@ -307,7 +307,7 @@ class UserUpdateTDDTest {
 
     @Test
     @WithMockUser(username = "admin@stockchef.com", roles = {"ADMIN"})
-    @DisplayName("TDD GREEN: ADMIN puede modificar información de cualquier usuario")
+    @DisplayName("TDD GREEN: ADMIN peut modifier information de n'importe quel utilisateur")
     void shouldReturn200_WhenAdminUpdatesAnyUser() throws Exception {
         // GIVEN: Usuario ADMIN modificando información de DEVELOPER
         UserResponse developerUpdatedResponse = new UserResponse(
@@ -332,8 +332,8 @@ class UserUpdateTDDTest {
                 "developer.updated@stockchef.com"
         );
 
-        // WHEN: ADMIN actualiza información de DEVELOPER
-        // THEN: Debe devolver 200 con información actualizada
+        // WHEN: ADMIN met à jour information de DEVELOPER
+        // THEN: Doit retourner 200 avec information mise à jour
         mockMvc.perform(put("/users/{id}", TestUuidHelper.DEVELOPER_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(developerUpdateRequest)))
@@ -376,7 +376,7 @@ class UserUpdateTDDTest {
                 "self.update@stockchef.com"
         );
 
-        // WHEN: DEVELOPER actualiza su propia información
+        // WHEN: DEVELOPER met à jour sa propre information
         // THEN: Debe devolver 200 exitosamente
         mockMvc.perform(put("/users/{id}", TestUuidHelper.DEVELOPER_UUID)
                         .contentType(MediaType.APPLICATION_JSON)
