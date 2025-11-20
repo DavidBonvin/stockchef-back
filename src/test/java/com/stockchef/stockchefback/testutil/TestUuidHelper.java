@@ -15,6 +15,8 @@ public class TestUuidHelper {
     public static final String ADMIN_UUID = UuidConstants.ADMIN_UUID;
     public static final String DEVELOPER_UUID = UuidConstants.DEVELOPER_UUID;
     public static final String MODERATOR_UUID = UuidConstants.MODERATOR_UUID;
+    public static final String EMPLOYEE_UUID = UuidConstants.EMPLOYEE_UUID;
+    public static final String CHEF_UUID = UuidConstants.CHEF_UUID;
 
     /**
      * Génère un UUID de test reproductible

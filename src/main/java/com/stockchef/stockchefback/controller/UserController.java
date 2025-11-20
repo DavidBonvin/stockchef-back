@@ -1,7 +1,12 @@
 package com.stockchef.stockchefback.controller;
 
 import com.stockchef.stockchefback.dto.user.RegisterRequest;
+import com.stockchef.stockchefback.dto.user.UpdateUserRequest;
 import com.stockchef.stockchefback.dto.user.UserResponse;
+import com.stockchef.stockchefback.dto.auth.ChangePasswordRequest;
+import com.stockchef.stockchefback.dto.auth.ResetPasswordRequest;
+import com.stockchef.stockchefback.dto.auth.ForgotPasswordRequest;
+import com.stockchef.stockchefback.exception.UserNotFoundException;
 import com.stockchef.stockchefback.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Contrôleur pour la gestion publique des utilisateurs
@@ -40,25 +47,212 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Récupère un utilisateur par son ID UUID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
-        log.info("Demande de récupération utilisateur ID: {}", id);
-        
-        // Méthode préparée pour l'intégration future avec findById()
-        log.warn("Fonctionnalité getUserById non encore implémentée pour ID: {}", id);
-        return ResponseEntity.notFound().build();
-    }
+
 
     /**
-     * Récupère le profil de l'utilisateur actuellement connecté
+     * Obtiene el perfil del usuario actualmente autenticado
+     * Extrae el email del JWT token y busca el usuario en la base de datos
      */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
-        log.info("Demande de profil utilisateur connecté");
-        // Méthode préparée pour l'intégration JWT future
+        log.info("Solicitud de perfil de usuario autenticado");
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando acceder al perfil");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // El email viene del JWT token en el campo 'username' de Spring Security
+        String email = authentication.getName();
+        log.info("Buscando perfil para email: {}", email);
+        
+        UserResponse userProfile = userService.getUserByEmail(email);
+        
+        log.info("Perfil encontrado para usuario: {} (ID: {})", 
+                userProfile.email(), userProfile.id());
+        
+        return ResponseEntity.ok(userProfile);
+    }
+
+    /**
+     * Actualiza la información personal de un usuario
+     * - Todos los roles pueden modificar su propia información
+     * - DEVELOPER y ADMIN pueden modificar información de otros usuarios
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateUserRequest request,
+            Authentication authentication) {
+        
+        log.info("Solicitud de actualización para usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando actualizar perfil");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        UserResponse updatedUser = userService.updateUser(id, request, currentUserEmail);
+        
+        log.info("Usuario actualizado exitosamente: {} (ID: {})", 
+                updatedUser.email(), updatedUser.id());
+        
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /**
+     * Lista todos los usuarios del sistema con filtros opcionales
+     * Solo accesible para ADMIN y DEVELOPER
+     */
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean active,
+            Authentication authentication) {
+        
+        log.info("Solicitud de lista de usuarios por {}", authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando listar usuarios");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        List<UserResponse> users = userService.getAllUsers(currentUserEmail, role, active);
+        
+        log.info("Lista de usuarios devuelta exitosamente: {} usuarios", users.size());
+        
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Obtiene un usuario específico por su ID
+     * - Usuarios pueden ver su propio perfil
+     * - ADMIN y DEVELOPER pueden ver cualquier perfil
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(
+            @PathVariable String id,
+            Authentication authentication) {
+        
+        log.info("Solicitud de usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando obtener perfil");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        UserResponse user = userService.getUserById(id, currentUserEmail);
+        
+        log.info("Usuario encontrado exitosamente: {} (ID: {})", user.email(), user.id());
+        
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * Elimina (desactiva) un usuario del sistema
+     * Solo accesible para ADMIN
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable String id,
+            Authentication authentication) {
+        
+        log.info("Solicitud de eliminación de usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando eliminar usuario");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        userService.deleteUser(id, currentUserEmail);
+        
+        log.info("Usuario eliminado exitosamente: {}", id);
+        
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Cambio de contraseña de usuario específico (propio usuario + ADMIN)
+     * PUT /users/{id}/password
+     */
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Void> changeUserPassword(
+            @PathVariable String id,
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String currentUserEmail = authentication.getName();
+        userService.changeUserPassword(id, request, currentUserEmail);
+        
+        log.info("Contraseña cambiada para usuario ID: {}", id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Reset de contraseña (solo ADMIN)
+     * POST /users/{id}/reset-password
+     */
+    @PostMapping("/{id}/reset-password")
+    public ResponseEntity<Void> resetUserPassword(
+            @PathVariable String id,
+            @Valid @RequestBody ResetPasswordRequest request,
+            Authentication authentication) {
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String currentUserEmail = authentication.getName();
+        userService.resetUserPassword(id, request, currentUserEmail);
+        
+        log.info("Contraseña reseteada para usuario ID: {} por admin", id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Cambio de contraseña personal
+     * POST /users/change-password
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePersonalPassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String currentUserEmail = authentication.getName();
+        userService.changePersonalPassword(currentUserEmail, request);
+        
+        log.info("Contraseña personal cambiada para usuario: {}", currentUserEmail);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Solicitar reset de contraseña
+     * POST /users/forgot-password
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        log.info("Solicitud de reset de contraseña para email: {}", request.email());
+        
+        try {
+            userService.requestPasswordReset(request.email());
+        } catch (UserNotFoundException e) {
+            // Por seguridad, no revelar si el email existe o no
+            log.warn("Solicitud de reset para email inexistente: {}", request.email());
+        }
+        
+        // Siempre devolver 200 por seguridad, aunque el email no exista
         return ResponseEntity.ok().build();
     }
 }

@@ -15,6 +15,8 @@ public final class UuidConstants {
     public static final String ADMIN_UUID = "550e8400-e29b-41d4-a716-446655440010";
     public static final String DEVELOPER_UUID = "550e8400-e29b-41d4-a716-446655440020";
     public static final String MODERATOR_UUID = "550e8400-e29b-41d4-a716-446655440030";
+    public static final String EMPLOYEE_UUID = "550e8400-e29b-41d4-a716-446655440040";
+    public static final String CHEF_UUID = "550e8400-e29b-41d4-a716-446655440050";
 
     private UuidConstants() {
         // Utility class - no instantiation
