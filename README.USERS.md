@@ -231,6 +231,192 @@ Body (JSON):
 }
 ```
 
+### 5. Listar Todos los Usuarios
+
+**Obtiene lista de todos los usuarios (Solo ADMIN y DEVELOPER)**
+
+#### 5.1. Listar Todos los Usuarios
+
+```http
+GET http://localhost:8090/api/users
+Authorization: Bearer {{admin_token}}
+```
+
+**Respuesta Exitosa (200 OK):**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440010",
+    "email": "admin@stockchef.com",
+    "firstName": "Admin",
+    "lastName": "User",
+    "role": "ROLE_ADMIN",
+    "originalRole": "ROLE_ADMIN",
+    "active": true,
+    "createdAt": "2025-11-19T19:54:04.123456",
+    "updatedAt": null,
+    "createdBy": "system"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440020",
+    "email": "developer@stockchef.com",
+    "firstName": "Developer",
+    "lastName": "User",
+    "role": "ROLE_DEVELOPER",
+    "originalRole": "ROLE_DEVELOPER",
+    "active": true,
+    "createdAt": "2025-11-19T19:54:04.123456",
+    "updatedAt": null,
+    "createdBy": "system"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440040",
+    "email": "employee@stockchef.com",
+    "firstName": "Employee",
+    "lastName": "User",
+    "role": "ROLE_EMPLOYEE",
+    "originalRole": "ROLE_EMPLOYEE",
+    "active": true,
+    "createdAt": "2025-11-19T19:54:04.123456",
+    "updatedAt": null,
+    "createdBy": "system"
+  }
+]
+```
+
+#### 5.2. Filtrar por Rol
+
+```http
+GET http://localhost:8090/api/users?role=ROLE_EMPLOYEE
+Authorization: Bearer {{admin_token}}
+```
+
+#### 5.3. Filtrar por Estado Activo
+
+```http
+GET http://localhost:8090/api/users?active=true
+Authorization: Bearer {{admin_token}}
+```
+
+#### 5.4. Filtrar por Rol y Estado
+
+```http
+GET http://localhost:8090/api/users?role=ROLE_DEVELOPER&active=true
+Authorization: Bearer {{admin_token}}
+```
+
+**Thunder Client:**
+```
+Method: GET
+URL: http://localhost:8090/api/users
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+**Con filtros:**
+```
+Method: GET
+URL: http://localhost:8090/api/users?role=ROLE_EMPLOYEE&active=true
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+### 6. Obtener Usuario por ID
+
+**Obtiene información de un usuario específico**
+
+#### 6.1. Ver Propio Perfil por ID (Todos los roles)
+
+```http
+GET http://localhost:8090/api/users/550e8400-e29b-41d4-a716-446655440040
+Authorization: Bearer {{employee_token}}
+```
+
+**Respuesta Exitosa (200 OK):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440040",
+  "email": "employee@stockchef.com",
+  "firstName": "Employee",
+  "lastName": "User",
+  "role": "ROLE_EMPLOYEE",
+  "originalRole": "ROLE_EMPLOYEE",
+  "active": true,
+  "createdAt": "2025-11-19T19:54:04.123456",
+  "updatedAt": null,
+  "createdBy": "system"
+}
+```
+
+#### 6.2. ADMIN/DEVELOPER Viendo Cualquier Usuario
+
+```http
+GET http://localhost:8090/api/users/550e8400-e29b-41d4-a716-446655440040
+Authorization: Bearer {{admin_token}}
+```
+
+**Thunder Client:**
+```
+Method: GET
+URL: http://localhost:8090/api/users/{{employee_id}}
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+
+### 7. Eliminar Usuario
+
+**Desactiva un usuario del sistema (Solo ADMIN)**
+
+```http
+DELETE http://localhost:8090/api/users/550e8400-e29b-41d4-a716-446655440040
+Authorization: Bearer {{admin_token}}
+```
+
+**Respuesta Exitosa (204 No Content):**
+```
+(Sin contenido en la respuesta)
+```
+
+**Thunder Client:**
+```
+Method: DELETE
+URL: http://localhost:8090/api/users/{{employee_id}}
+Headers:
+  Authorization: Bearer {{admin_token}}
+```
+  "email": "empleado.nuevo@stockchef.com"
+}
+```
+
+#### 4.2. DEVELOPER/ADMIN Actualizando Otros Usuarios
+
+```http
+PUT http://localhost:8090/api/users/550e8400-e29b-41d4-a716-446655440040
+Authorization: Bearer {{developer_token}}
+Content-Type: application/json
+
+{
+  "firstName": "Usuario",
+  "lastName": "Modificado por Dev",
+  "email": "modificado.por.dev@stockchef.com"
+}
+```
+
+**Thunder Client:**
+```
+Method: PUT
+URL: http://localhost:8090/api/users/550e8400-e29b-41d4-a716-446655440040
+Headers:
+  Authorization: Bearer {{developer_token}}
+  Content-Type: application/json
+Body (JSON):
+{
+  "firstName": "Usuario",
+  "lastName": "Modificado por Dev",
+  "email": "modificado.por.dev@stockchef.com"
+}
+```
+
 ---
 
 ## ⚙️ Configuración Thunder Client
@@ -329,7 +515,7 @@ POST {{base_url}}/auth/login
 }
 ```
 
-### Flujo 3: Probar Autorización
+### Flujo 3: Probar Autorización y Nuevos Endpoints
 
 #### 3.1. Employee actualizando su propia información (✅ Permitido)
 ```
@@ -362,6 +548,68 @@ Authorization: Bearer {{developer_token}}
   "lastName": "By Developer",
   "email": "modified.by.dev@stockchef.com"
 }
+```
+
+#### 3.4. ADMIN listando todos los usuarios (✅ Permitido)
+```
+GET {{base_url}}/users
+Authorization: Bearer {{admin_token}}
+```
+
+#### 3.5. Employee intentando listar usuarios (❌ Prohibido - 403)
+```
+GET {{base_url}}/users
+Authorization: Bearer {{employee_token}}
+```
+
+#### 3.6. DEVELOPER obteniendo usuario específico (✅ Permitido)
+```
+GET {{base_url}}/users/{{employee_id}}
+Authorization: Bearer {{developer_token}}
+```
+
+#### 3.7. Employee viendo perfil de otro usuario (❌ Prohibido - 403)
+```
+GET {{base_url}}/users/{{admin_id}}
+Authorization: Bearer {{employee_token}}
+```
+
+#### 3.8. ADMIN eliminando un usuario (✅ Permitido)
+```
+DELETE {{base_url}}/users/{{employee_id}}
+Authorization: Bearer {{admin_token}}
+```
+
+#### 3.9. Developer intentando eliminar usuario (❌ Prohibido - 403)
+```
+DELETE {{base_url}}/users/{{employee_id}}
+Authorization: Bearer {{developer_token}}
+```
+
+### Flujo 4: Probar Filtros en Lista de Usuarios
+
+#### 4.1. Listar todos los usuarios activos
+```
+GET {{base_url}}/users?active=true
+Authorization: Bearer {{admin_token}}
+```
+
+#### 4.2. Listar solo empleados
+```
+GET {{base_url}}/users?role=ROLE_EMPLOYEE
+Authorization: Bearer {{admin_token}}
+```
+
+#### 4.3. Listar desarrolladores activos
+```
+GET {{base_url}}/users?role=ROLE_DEVELOPER&active=true
+Authorization: Bearer {{admin_token}}
+```
+
+#### 4.4. Listar administradores
+```
+GET {{base_url}}/users?role=ROLE_ADMIN
+Authorization: Bearer {{admin_token}}
 ```
 
 ---
@@ -464,6 +712,14 @@ Crea una colección con estas peticiones en orden:
 6. `Developer Updates Employee` → Developer modifica employee
 7. `Employee Tries Update Admin` → Debe fallar con 403
 8. `Invalid Data Update` → Debe fallar con 400
+9. `Admin List All Users` → Lista todos los usuarios
+10. `Employee Try List Users` → Debe fallar con 403
+11. `Admin Get User By ID` → Obtiene usuario específico
+12. `Employee View Other Profile` → Debe fallar con 403
+13. `Admin Delete User` → Elimina usuario
+14. `Developer Try Delete User` → Debe fallar con 403
+15. `Filter Users by Role` → Lista usuarios por rol
+16. `Filter Users by Active Status` → Lista usuarios activos
 
 ---
 
@@ -471,9 +727,29 @@ Crea una colección con estas peticiones en orden:
 
 | Acción | EMPLOYEE | CHEF | DEVELOPER | ADMIN |
 |--------|----------|------|-----------|-------|
-| Ver su perfil | ✅ | ✅ | ✅ | ✅ |
+| Ver su perfil (`/me` o `/users/{su_id}`) | ✅ | ✅ | ✅ | ✅ |
 | Actualizar su info | ✅ | ✅ | ✅ | ✅ |
 | Actualizar otros usuarios | ❌ | ❌ | ✅ | ✅ |
+| Listar todos los usuarios | ❌ | ❌ | ✅ | ✅ |
+| Ver perfil de otros usuarios | ❌ | ❌ | ✅ | ✅ |
+| Eliminar usuarios | ❌ | ❌ | ❌ | ✅ |
 | Registrar cuenta | ✅ | ✅ | ✅ | ✅ |
+| Filtrar usuarios (por rol/estado) | ❌ | ❌ | ✅ | ✅ |
+
+### Nuevos Endpoints Implementados ✨
+
+| Endpoint | Método | Descripción | Permisos |
+|----------|--------|-------------|----------|
+| `/users` | GET | Lista todos los usuarios con filtros opcionales | ADMIN, DEVELOPER |
+| `/users/{id}` | GET | Obtiene usuario específico por ID | Propio perfil: Todos / Otros: ADMIN, DEVELOPER |
+| `/users/{id}` | DELETE | Elimina/desactiva usuario | Solo ADMIN |
+
+### Parámetros de Filtro Disponibles
+
+| Parámetro | Tipo | Descripción | Ejemplo |
+|-----------|------|-------------|---------|
+| `role` | String | Filtra por rol específico | `?role=ROLE_EMPLOYEE` |
+| `active` | Boolean | Filtra por estado activo | `?active=true` |
+| Combinados | - | Múltiples filtros | `?role=ROLE_DEVELOPER&active=true` |
 
 ¡Con esta guía deberías poder probar completamente toda la funcionalidad de usuarios usando Thunder Client! 🚀

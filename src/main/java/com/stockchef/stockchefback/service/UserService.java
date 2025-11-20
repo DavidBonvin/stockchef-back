@@ -298,4 +298,131 @@ public class UserService {
         log.info("Usuario {} ({}) autorizado para modificar usuario {}", 
                 currentUser.getEmail(), currentRole, targetUser.getId());
     }
+
+    /**
+     * Obtiene la lista completa de usuarios con filtros opcionales
+     * Solo accesible para ADMIN y DEVELOPER
+     * @param currentUserEmail Email del usuario que hace la petición
+     * @param roleFilter Filtro opcional por rol
+     * @param activeFilter Filtro opcional por estado activo
+     * @return Lista de usuarios filtrada
+     */
+    public List<UserResponse> getAllUsers(String currentUserEmail, String roleFilter, Boolean activeFilter) {
+        log.info("Solicitud de lista de usuarios por {}", currentUserEmail);
+
+        // Buscar el usuario que hace la petición
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuario autenticado no encontrado"));
+
+        // Verificar permisos - Solo ADMIN y DEVELOPER pueden listar usuarios
+        UserRole currentRole = getEffectiveRole(currentUser);
+        if (currentRole != UserRole.ROLE_ADMIN && currentRole != UserRole.ROLE_DEVELOPER) {
+            log.warn("Usuario {} ({}) intentó listar usuarios sin permisos", currentUserEmail, currentRole);
+            throw new InsufficientPermissionsException("No tienes permisos para listar usuarios");
+        }
+
+        // Obtener usuarios con filtros
+        List<User> users;
+        if (roleFilter != null && activeFilter != null) {
+            UserRole role = UserRole.valueOf("ROLE_" + roleFilter.toUpperCase());
+            users = userRepository.findByRoleAndIsActive(role, activeFilter);
+        } else if (roleFilter != null) {
+            UserRole role = UserRole.valueOf("ROLE_" + roleFilter.toUpperCase());
+            users = userRepository.findByRole(role);
+        } else if (activeFilter != null) {
+            users = userRepository.findByIsActive(activeFilter);
+        } else {
+            users = userRepository.findAll();
+        }
+
+        log.info("Lista de usuarios devuelta: {} usuarios para {}", users.size(), currentUserEmail);
+
+        return users.stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Obtiene un usuario específico por su ID
+     * - Usuarios pueden ver su propio perfil
+     * - ADMIN y DEVELOPER pueden ver cualquier perfil
+     * @param userId ID del usuario a consultar
+     * @param currentUserEmail Email del usuario que hace la petición
+     * @return Información del usuario solicitado
+     */
+    public UserResponse getUserById(String userId, String currentUserEmail) {
+        log.info("Solicitud de usuario {} por {}", userId, currentUserEmail);
+
+        // Buscar el usuario solicitado
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // Buscar el usuario que hace la petición
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuario autenticado no encontrado"));
+
+        // Verificar permisos
+        validateViewPermissions(targetUser, currentUser);
+
+        log.info("Usuario {} encontrado exitosamente para {}", userId, currentUserEmail);
+
+        return convertToUserResponse(targetUser);
+    }
+
+    /**
+     * Elimina (desactiva) un usuario del sistema
+     * Solo accesible para ADMIN
+     * @param userId ID del usuario a eliminar
+     * @param currentUserEmail Email del usuario que hace la petición
+     */
+    public void deleteUser(String userId, String currentUserEmail) {
+        log.info("Solicitud de eliminación de usuario {} por {}", userId, currentUserEmail);
+
+        // Buscar el usuario a eliminar
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+        // Buscar el usuario que hace la petición
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UserNotFoundException("Usuario autenticado no encontrado"));
+
+        // Verificar permisos - Solo ADMIN puede eliminar usuarios
+        UserRole currentRole = getEffectiveRole(currentUser);
+        if (currentRole != UserRole.ROLE_ADMIN) {
+            log.warn("Usuario {} ({}) intentó eliminar usuario {} sin permisos", 
+                    currentUserEmail, currentRole, userId);
+            throw new InsufficientPermissionsException("Solo ADMIN puede eliminar usuarios");
+        }
+
+        // Desactivar el usuario en lugar de eliminarlo físicamente
+        targetUser.setIsActive(false);
+        targetUser.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(targetUser);
+
+        log.info("Usuario {} desactivado exitosamente por {}", userId, currentUserEmail);
+    }
+
+    /**
+     * Valida los permisos para ver información de usuario
+     * @param targetUser Usuario que se quiere consultar
+     * @param currentUser Usuario que hace la petición
+     */
+    private void validateViewPermissions(User targetUser, User currentUser) {
+        // Si es el mismo usuario, permitir siempre
+        if (targetUser.getId().equals(currentUser.getId())) {
+            log.info("Usuario {} consultando su propia información", currentUser.getEmail());
+            return;
+        }
+
+        // Solo ADMIN y DEVELOPER pueden ver otros perfiles
+        UserRole currentRole = getEffectiveRole(currentUser);
+        if (currentRole != UserRole.ROLE_ADMIN && currentRole != UserRole.ROLE_DEVELOPER) {
+            log.warn("Usuario {} ({}) intentó ver perfil de {} sin permisos", 
+                    currentUser.getEmail(), currentRole, targetUser.getId());
+            throw new InsufficientPermissionsException("No tienes permisos para ver este usuario");
+        }
+
+        log.info("Usuario {} ({}) autorizado para ver perfil de {}", 
+                currentUser.getEmail(), currentRole, targetUser.getId());
+    }
 }

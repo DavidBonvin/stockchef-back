@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Contrôleur pour la gestion publique des utilisateurs
  * Endpoints accessibles publiquement ou par les utilisateurs authentifiés
@@ -41,17 +43,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Récupère un utilisateur par son ID UUID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable String id) {
-        log.info("Demande de récupération utilisateur ID: {}", id);
-        
-        // Méthode préparée pour l'intégration future avec findById()
-        log.warn("Fonctionnalité getUserById non encore implémentée pour ID: {}", id);
-        return ResponseEntity.notFound().build();
-    }
+
 
     /**
      * Obtiene el perfil del usuario actualmente autenticado
@@ -103,5 +95,79 @@ public class UserController {
                 updatedUser.email(), updatedUser.id());
         
         return ResponseEntity.ok(updatedUser);
+    }
+
+    /**
+     * Lista todos los usuarios del sistema con filtros opcionales
+     * Solo accesible para ADMIN y DEVELOPER
+     */
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Boolean active,
+            Authentication authentication) {
+        
+        log.info("Solicitud de lista de usuarios por {}", authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando listar usuarios");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        List<UserResponse> users = userService.getAllUsers(currentUserEmail, role, active);
+        
+        log.info("Lista de usuarios devuelta exitosamente: {} usuarios", users.size());
+        
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Obtiene un usuario específico por su ID
+     * - Usuarios pueden ver su propio perfil
+     * - ADMIN y DEVELOPER pueden ver cualquier perfil
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(
+            @PathVariable String id,
+            Authentication authentication) {
+        
+        log.info("Solicitud de usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando obtener perfil");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        UserResponse user = userService.getUserById(id, currentUserEmail);
+        
+        log.info("Usuario encontrado exitosamente: {} (ID: {})", user.email(), user.id());
+        
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * Elimina (desactiva) un usuario del sistema
+     * Solo accesible para ADMIN
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable String id,
+            Authentication authentication) {
+        
+        log.info("Solicitud de eliminación de usuario ID: {} por {}", id, authentication.getName());
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Usuario no autenticado intentando eliminar usuario");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        String currentUserEmail = authentication.getName();
+        userService.deleteUser(id, currentUserEmail);
+        
+        log.info("Usuario eliminado exitosamente: {}", id);
+        
+        return ResponseEntity.noContent().build();
     }
 }
