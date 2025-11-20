@@ -2,14 +2,19 @@ package com.stockchef.stockchefback.controller;
 
 import com.stockchef.stockchefback.dto.auth.LoginRequest;
 import com.stockchef.stockchefback.dto.auth.LoginResponse;
+import com.stockchef.stockchefback.dto.auth.RefreshTokenRequest;
+import com.stockchef.stockchefback.exception.InvalidTokenException;
 import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.repository.UserRepository;
+import com.stockchef.stockchefback.service.AuthService;
+import com.stockchef.stockchefback.service.AuthService.TokenResponse;
 import com.stockchef.stockchefback.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +35,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthService authService;
 
     /**
      * Endpoint pour l'authentification des utilisateurs
@@ -84,6 +90,48 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Erreur interne durant la connexion: ", e);
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * Renovar token JWT
+     * POST /auth/refresh
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        log.info("Solicitud de renovación de token recibida");
+        
+        try {
+            TokenResponse response = authService.refreshToken(request);
+            log.info("Token renovado exitosamente");
+            return ResponseEntity.ok(response);
+        } catch (InvalidTokenException e) {
+            log.warn("Intento de renovación con token inválido: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Invalidar token (logout)
+     * POST /auth/logout
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            log.warn("Intento de logout sin autenticación");
+            return ResponseEntity.status(403).build();
+        }
+
+        String userEmail = authentication.getName();
+        log.info("Logout solicitado para usuario: {}", userEmail);
+        
+        try {
+            authService.invalidateToken(userEmail);
+            log.info("Logout exitoso para usuario: {}", userEmail);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Error durante logout para usuario {}: {}", userEmail, e.getMessage());
+            throw e;
         }
     }
 }

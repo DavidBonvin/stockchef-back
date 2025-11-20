@@ -41,6 +41,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 // Permitir acceso público a registro de usuarios
                 .requestMatchers("/users/register").permitAll()
+                // Permitir acceso público a forgot-password
+                .requestMatchers("/users/forgot-password").permitAll()
                 // Permitir acceso a endpoints de health
                 .requestMatchers("/api/health", "/api/health/**").permitAll()
                 .requestMatchers("/health", "/health/**").permitAll()
