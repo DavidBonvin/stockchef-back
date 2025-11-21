@@ -1,6 +1,8 @@
 package com.stockchef.stockchefback.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stockchef.stockchefback.config.TestConfig;
+import com.stockchef.stockchefback.config.TestSecurityConfig;
 import com.stockchef.stockchefback.dto.auth.LoginRequest;
 import com.stockchef.stockchefback.dto.auth.LoginResponse;
 import com.stockchef.stockchefback.model.User;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(AuthController.class)
 @ActiveProfiles("test")
+@Import({TestConfig.class, TestSecurityConfig.class})
 @DisplayName("Auth Controller Tests")
 class AuthControllerTest {
 
@@ -46,6 +50,9 @@ class AuthControllerTest {
 
     @MockBean
     private JwtService jwtService;
+
+    @MockBean
+    private com.stockchef.stockchefback.service.AuthService authService;
 
     private User testDeveloper;
     private User testAdmin;

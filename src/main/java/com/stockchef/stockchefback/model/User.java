@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Entidad User para autenticación en StockChef
- * Utiliza UUID para identificadores únicos y seguros
+ * Entité User pour authentification en StockChef
+ * Utilise UUID pour identificateurs uniques et sécurisés
  */
 @Data
 @Builder
@@ -66,7 +66,7 @@ public class User implements UserDetails {
     @Builder.Default
     private String createdBy = "system";
 
-    // UserDetails implementation
+    // Implémentation UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

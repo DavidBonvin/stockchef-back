@@ -40,6 +40,18 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private com.stockchef.stockchefback.service.user.UserRegistrationService registrationService;
+
+    @Mock
+    private com.stockchef.stockchefback.service.user.UserPasswordService passwordService;
+
+    @Mock
+    private com.stockchef.stockchefback.service.user.UserManagementService managementService;
+
+    @Mock
+    private com.stockchef.stockchefback.service.user.UserAuthorizationService authorizationService;
+
     @InjectMocks
     private UserService userService;
 

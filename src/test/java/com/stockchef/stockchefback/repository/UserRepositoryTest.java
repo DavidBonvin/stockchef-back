@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests TDD para UserRepository
+ * Tests TDD pour UserRepository
  */
 @DataJpaTest
 @ActiveProfiles("test")

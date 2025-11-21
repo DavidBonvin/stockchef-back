@@ -9,45 +9,45 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository para la entidad User
- * Utiliza String (UUID) como tipo de ID para seguridad
+ * Repository pour l'entité User
+ * Utilise String (UUID) comme type d'ID pour la sécurité
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     
     /**
-     * Busca un usuario por su email
-     * @param email el email del usuario
-     * @return Optional<User> el usuario si existe
+     * Recherche un utilisateur par son email
+     * @param email l'email de l'utilisateur
+     * @return Optional<User> l'utilisateur s'il existe
      */
     Optional<User> findByEmail(String email);
     
     /**
-     * Verifica si existe un usuario con el email dado
-     * @param email el email a verificar
-     * @return true si existe, false si no
+     * Vérifie si un utilisateur existe avec l'email donné
+     * @param email l'email à vérifier
+     * @return true s'il existe, false sinon
      */
     boolean existsByEmail(String email);
 
     /**
-     * Busca usuarios por rol
-     * @param role el rol a buscar
-     * @return Lista de usuarios con ese rol
+     * Recherche les utilisateurs par rôle
+     * @param role le rôle à rechercher
+     * @return Liste des utilisateurs avec ce rôle
      */
     List<User> findByRole(UserRole role);
 
     /**
-     * Busca usuarios por estado activo/inactivo
-     * @param isActive el estado a buscar
-     * @return Lista de usuarios con ese estado
+     * Recherche les utilisateurs par état actif/inactif
+     * @param isActive l'état à rechercher
+     * @return Liste des utilisateurs avec cet état
      */
     List<User> findByIsActive(boolean isActive);
 
     /**
-     * Busca usuarios por rol y estado
-     * @param role el rol a buscar
-     * @param isActive el estado a buscar
-     * @return Lista de usuarios que coinciden con ambos criterios
+     * Recherche les utilisateurs par rôle et état
+     * @param role le rôle à rechercher
+     * @param isActive l'état à rechercher
+     * @return Liste des utilisateurs qui correspondent aux deux critères
      */
     List<User> findByRoleAndIsActive(UserRole role, boolean isActive);
 }

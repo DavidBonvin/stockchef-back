@@ -84,7 +84,7 @@ public class AuthController {
             log.info("Connexion réussie pour utilisateur: {} avec rôle: {}", user.getEmail(), user.getRole());
             return ResponseEntity.ok(response);
             
-        } catch (UsernameNotFoundException | BadCredentialsException e) {
+        } catch (BadCredentialsException | UsernameNotFoundException e) {
             log.error("Erreur d'authentification: {}", e.getMessage());
             return ResponseEntity.status(401).build();
         } catch (Exception e) {

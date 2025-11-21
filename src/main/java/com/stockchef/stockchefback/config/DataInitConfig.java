@@ -3,8 +3,8 @@ package com.stockchef.stockchefback.config;
 import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
 import com.stockchef.stockchefback.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -16,12 +16,17 @@ import java.time.LocalDateTime;
  * Crée des utilisateurs par défaut pour chaque rôle si la base de données est vide
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class DataInitConfig implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public DataInitConfig(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void run(String... args) throws Exception {
@@ -84,16 +89,16 @@ public class DataInitConfig implements CommandLineRunner {
     }
 
     private User createUser(String email, String password, String firstName, String lastName, UserRole role) {
-        return User.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .firstName(firstName)
-                .lastName(lastName)
-                .role(role)
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .createdBy("system")
-                .build();
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setRole(role);
+        user.setIsActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
+        user.setCreatedBy("system");
+        return user;
     }
 }
