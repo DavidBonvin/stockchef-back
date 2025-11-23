@@ -8,9 +8,13 @@ Ce document fournit toutes les informations nécessaires pour intégrer le backe
 
 ### URL de Base
 ```
-Production: https://votre-domaine.com
+Production: https://stockchef-back-production.up.railway.app
 Développement: http://localhost:8080
 ```
+
+### ⚠️ Note Importante
+**Tous les endpoints en production doivent inclure le préfixe `/api`**  
+Exemple: `https://stockchef-back-production.up.railway.app/api/auth/login`
 
 ### Headers Requis
 
@@ -446,7 +450,9 @@ describe('StockChef API Integration Tests', () => {
 #### 2. **Configuration de Base**
 ```javascript
 // config/test-config.js
-const API_BASE_URL = process.env.API_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://stockchef-back-production.up.railway.app/api'
+  : 'http://localhost:8080';
 const TEST_TIMEOUT = 10000; // 10 secondes
 
 // Axios configuration
@@ -719,7 +725,7 @@ jobs:
       - name: Run API Tests
         run: npm test
         env:
-          API_URL: http://localhost:8080
+          API_URL: https://stockchef-back-production.up.railway.app/api
           
       - name: Cleanup
         run: docker-compose down
