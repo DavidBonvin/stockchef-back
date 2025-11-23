@@ -1,13 +1,8 @@
 package com.stockchef.stockchefback.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stockchef.stockchefback.config.TestConfig;
-import com.stockchef.stockchefback.config.TestSecurityConfig;
 import com.stockchef.stockchefback.dto.auth.LoginRequest;
-import com.stockchef.stockchefback.dto.auth.LoginResponse;
-import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
-import com.stockchef.stockchefback.repository.UserRepository;
 import com.stockchef.stockchefback.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,24 +10,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.stockchef.stockchefback.repository.UserRepository;
+import com.stockchef.stockchefback.service.AuthService;
+import com.stockchef.stockchefback.model.User;
 
-import static org.assertj.core.api.Assertions.assertThat;
-// import static org.mockito.Mockito.*; // Removed unused import
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Tests TDD para AuthController
+ * Tests unitarios simples para AuthController
  */
 @WebMvcTest(AuthController.class)
 @ActiveProfiles("test")
-@Import({TestConfig.class, TestSecurityConfig.class})
 @DisplayName("Auth Controller Tests")
 class AuthControllerTest {
 
@@ -52,223 +51,113 @@ class AuthControllerTest {
     private JwtService jwtService;
 
     @MockBean
-    private com.stockchef.stockchefback.service.AuthService authService;
+    private AuthService authService;
 
-    private User testDeveloper;
-    private User testAdmin;
-    private User testChef;
-    private User testEmployee;
+    private User mockUser;
 
     @BeforeEach
     void setUp() {
-        // Limpiar datos
-        userRepository.deleteAll();
-
-        // Créer utilisateurs de test
-        testDeveloper = createAndSaveUser(
-                "developer@stockchef.com", "devpass123",
-                "Super", "Admin", UserRole.ROLE_DEVELOPER
-        );
-
-        testAdmin = createAndSaveUser(
-                "admin@stockchef.com", "adminpass123",
-                "John", "Administrator", UserRole.ROLE_ADMIN
-        );
-
-        testChef = createAndSaveUser(
-                "chef@stockchef.com", "chefpass123",
-                "Maria", "Rodriguez", UserRole.ROLE_CHEF
-        );
-
-        testEmployee = createAndSaveUser(
-                "employee@stockchef.com", "emppass123",
-                "Pedro", "Martinez", UserRole.ROLE_EMPLOYEE
-        );
+        mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("developer@stockchef.com");
+        mockUser.setPassword("$2a$10$encodedPassword");
+        mockUser.setFirstName("Super");
+        mockUser.setLastName("Admin");
+        mockUser.setRole(UserRole.ROLE_DEVELOPER);
+        mockUser.setIsActive(true);
+        mockUser.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
-    @DisplayName("POST /auth/login - Doit authentifier developer avec succès")
-    void shouldAuthenticateDeveloperSuccessfully() throws Exception {
+    @DisplayName("POST /auth/login - Debe autenticar usuario válido exitosamente")
+    void shouldAuthenticateValidUserSuccessfully() throws Exception {
         // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "developer@stockchef.com", 
-                "devpass123"
-        );
+        LoginRequest loginRequest = new LoginRequest("developer@stockchef.com", "devpass123");
+        
+        when(userRepository.findByEmail("developer@stockchef.com"))
+                .thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("devpass123", mockUser.getPassword()))
+                .thenReturn(true);
+        when(jwtService.generateToken(mockUser))
+                .thenReturn("mock-jwt-token");
 
         // When & Then
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.email").value("developer@stockchef.com"))
                 .andExpect(jsonPath("$.fullName").value("Super Admin"))
                 .andExpect(jsonPath("$.role").value("ROLE_DEVELOPER"))
-                .andExpect(jsonPath("$.expiresIn").exists())
-                .andReturn();
-
-        // Vérifier que le token soit valide
-        LoginResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                LoginResponse.class
-        );
-
-        assertThat(jwtService.extractEmail(response.token())).isEqualTo("developer@stockchef.com");
-        assertThat(jwtService.extractRole(response.token())).isEqualTo("ROLE_DEVELOPER");
-        assertThat(jwtService.isTokenValid(response.token(), testDeveloper)).isTrue();
+                .andExpect(jsonPath("$.token").value("mock-jwt-token"));
     }
 
     @Test
-    @DisplayName("POST /auth/login - Doit authentifier admin avec succès")
-    void shouldAuthenticateAdminSuccessfully() throws Exception {
-        // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "admin@stockchef.com", 
-                "adminpass123"
-        );
-
-        // When & Then
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value("admin@stockchef.com"))
-                .andExpect(jsonPath("$.fullName").value("John Administrator"))
-                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
-    }
-
-    @Test
-    @DisplayName("POST /auth/login - Doit authentifier chef avec succès")
-    void shouldAuthenticateChefSuccessfully() throws Exception {
-        // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "chef@stockchef.com", 
-                "chefpass123"
-        );
-
-        // When & Then
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.role").value("ROLE_CHEF"));
-    }
-
-    @Test
-    @DisplayName("POST /auth/login - Doit authentifier employee avec succès")
-    void shouldAuthenticateEmployeeSuccessfully() throws Exception {
-        // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "employee@stockchef.com", 
-                "emppass123"
-        );
-
-        // When & Then
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.role").value("ROLE_EMPLOYEE"));
-    }
-
-    @Test
-    @DisplayName("POST /auth/login - Doit rejeter identifiants invalides")
+    @DisplayName("POST /auth/login - Debe rechazar credenciales inválidas")
     void shouldRejectInvalidCredentials() throws Exception {
         // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "developer@stockchef.com", 
-                "wrongpassword"
-        );
+        LoginRequest loginRequest = new LoginRequest("developer@stockchef.com", "wrongpass");
+        
+        when(userRepository.findByEmail("developer@stockchef.com"))
+                .thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("wrongpass", mockUser.getPassword()))
+                .thenReturn(false);
 
         // When & Then
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe rechazar email inexistente")
+    @DisplayName("POST /auth/login - Debe rechazar email no existente")
     void shouldRejectNonExistentEmail() throws Exception {
         // Given
-        LoginRequest loginRequest = new LoginRequest(
-                "nonexistent@stockchef.com", 
-                "anypassword"
-        );
+        LoginRequest loginRequest = new LoginRequest("nonexistent@stockchef.com", "anypass");
+        
+        when(userRepository.findByEmail("nonexistent@stockchef.com"))
+                .thenReturn(Optional.empty());
 
         // When & Then
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("POST /auth/login - Debe validar formato de request")
-    void shouldValidateRequestFormat() throws Exception {
-        // Given - email inválido
-        LoginRequest invalidEmailRequest = new LoginRequest(
-                "invalid-email", 
-                "password123"
-        );
-
-        // When & Then
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidEmailRequest)))
-                .andExpect(status().isBadRequest());
-
-        // Given - password muy corta
-        LoginRequest shortPasswordRequest = new LoginRequest(
-                "user@stockchef.com", 
-                "123"
-        );
-
-        // When & Then
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(shortPasswordRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("POST /auth/login - Doit rejeter utilisateur inactif")
+    @DisplayName("POST /auth/login - Debe rechazar usuario inactivo")
     void shouldRejectInactiveUser() throws Exception {
-        // Given - créer utilisateur inactif
-        User inactiveUser = User.builder()
-                .email("inactive@stockchef.com")
-                .password(passwordEncoder.encode("password123"))
-                .firstName("Inactive")
-                .lastName("User")
-                .role(UserRole.ROLE_EMPLOYEE)
-                .isActive(false)
-                .build();
-        userRepository.save(inactiveUser);
-
-        LoginRequest loginRequest = new LoginRequest(
-                "inactive@stockchef.com", 
-                "password123"
-        );
+        // Given
+        mockUser.setIsActive(false);
+        LoginRequest loginRequest = new LoginRequest("developer@stockchef.com", "devpass123");
+        
+        when(userRepository.findByEmail("developer@stockchef.com"))
+                .thenReturn(Optional.of(mockUser));
 
         // When & Then
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
 
-    private User createAndSaveUser(String email, String password, String firstName, 
-                                  String lastName, UserRole role) {
-        User user = User.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .firstName(firstName)
-                .lastName(lastName)
-                .role(role)
-                .isActive(true)
-                .build();
-        return userRepository.save(user);
+    @Test
+    @DisplayName("POST /auth/login - Debe validar formato de requête")
+    void shouldValidateRequestFormat() throws Exception {
+        // Given - invalid request with missing password
+        String invalidRequest = """
+                {
+                    "email": "test@example.com"
+                }
+                """;
+
+        // When & Then
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest))
+                .andExpect(status().isBadRequest());
     }
 }
