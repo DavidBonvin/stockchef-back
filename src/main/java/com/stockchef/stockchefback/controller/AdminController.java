@@ -3,6 +3,8 @@ package com.stockchef.stockchefback.controller;
 import com.stockchef.stockchefback.dto.user.UpdateUserRoleRequest;
 import com.stockchef.stockchefback.dto.user.UpdateUserStatusRequest;
 import com.stockchef.stockchefback.dto.user.UserResponse;
+import com.stockchef.stockchefback.model.User;
+import com.stockchef.stockchefback.repository.UserRepository;
 import com.stockchef.stockchefback.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     /**
      * Liste tous les utilisateurs avec leurs rôles effectifs
@@ -57,12 +60,16 @@ public class AdminController {
         log.info("Demande de mise à jour du rôle pour utilisateur ID: {} vers {}", 
                 id, request.newRole());
         
-        // Pour les tests, on utilise la surcharge sans requester
-        // En production, on récupérerait l'utilisateur depuis authentication
+        // Récupérer l'utilisateur depuis authentication
+        String requesterEmail = authentication.getName();
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + requesterEmail));
+        
         UserResponse response = userService.updateUserRole(
                 id, 
                 request.newRole(), 
-                request.reason()
+                request.reason(),
+                requester
         );
         
         log.info("Rôle mis à jour avec succès pour utilisateur ID: {} vers {}", 
@@ -78,7 +85,8 @@ public class AdminController {
     @PutMapping("/users/{id}/status")
     public ResponseEntity<UserResponse> updateUserStatus(
             @PathVariable String id,
-            @Valid @RequestBody UpdateUserStatusRequest request) {
+            @Valid @RequestBody UpdateUserStatusRequest request,
+            Authentication authentication) {
         
         log.info("Demande de mise à jour du statut pour utilisateur ID: {} vers {}", 
                 id, request.active() ? "actif" : "inactif");

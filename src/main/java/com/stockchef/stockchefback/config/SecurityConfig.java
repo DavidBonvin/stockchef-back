@@ -3,6 +3,7 @@ package com.stockchef.stockchefback.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -48,10 +50,11 @@ public class SecurityConfig {
                 // Permettre l'accès public à forgot-password
                 .requestMatchers("/users/forgot-password").permitAll()
                 // Permettre l'accès aux endpoints de health
-                .requestMatchers("/api/health", "/api/health/**").permitAll()
                 .requestMatchers("/health", "/health/**").permitAll()
                 // Permettre l'accès aux endpoints d'Actuator
                 .requestMatchers("/actuator/**").permitAll()
+                // Endpoint racine pour Railway health checks
+                .requestMatchers("/").permitAll()
                 // Toutes les autres routes nécessitent une authentification
                 .anyRequest().authenticated()
             )

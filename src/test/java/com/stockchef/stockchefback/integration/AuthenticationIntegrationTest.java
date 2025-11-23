@@ -12,17 +12,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,8 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests de integración end-to-end para el sistema de autenticación
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @Transactional
 @DisplayName("🔐 Authentication End-to-End Integration Tests")
 class AuthenticationIntegrationTest {
@@ -67,6 +70,9 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("🚀 Should complete full authentication flow for DEVELOPER")
     void shouldCompleteFullAuthenticationFlowForDeveloper() throws Exception {
+        // Debug: verificar que el usuario existe
+        assertTrue(userRepository.existsByEmail("developer@stockchef.com"), "Usuario developer debe existir");
+        
         // Given
         LoginRequest loginRequest = new LoginRequest(
                 "developer@stockchef.com", 
@@ -272,44 +278,63 @@ class AuthenticationIntegrationTest {
     }
 
     private void createTestUsers() {
-        // Developer
-        userRepository.save(User.builder()
-                .email("developer@stockchef.com")
-                .password(passwordEncoder.encode("devpass123"))
-                .firstName("Super")
-                .lastName("Admin")
-                .role(UserRole.ROLE_DEVELOPER)
-                .isActive(true)
-                .build());
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Solo crear usuarios si no existen
+        if (!userRepository.existsByEmail("developer@stockchef.com")) {
+            userRepository.save(User.builder()
+                    .email("developer@stockchef.com")
+                    .password(passwordEncoder.encode("devpass123"))
+                    .firstName("Super")
+                    .lastName("Admin")
+                    .role(UserRole.ROLE_DEVELOPER)
+                    .isActive(true)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .createdBy("system")
+                    .build());
+        }
 
-        // Admin
-        userRepository.save(User.builder()
-                .email("admin@stockchef.com")
-                .password(passwordEncoder.encode("adminpass123"))
-                .firstName("John")
-                .lastName("Administrator")
-                .role(UserRole.ROLE_ADMIN)
-                .isActive(true)
-                .build());
+        if (!userRepository.existsByEmail("admin@stockchef.com")) {
+            userRepository.save(User.builder()
+                    .email("admin@stockchef.com")
+                    .password(passwordEncoder.encode("adminpass123"))
+                    .firstName("John")
+                    .lastName("Administrator")
+                    .role(UserRole.ROLE_ADMIN)
+                    .isActive(true)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .createdBy("system")
+                    .build());
+        }
 
-        // Chef
-        userRepository.save(User.builder()
-                .email("chef@stockchef.com")
-                .password(passwordEncoder.encode("chefpass123"))
-                .firstName("Maria")
-                .lastName("Rodriguez")
-                .role(UserRole.ROLE_CHEF)
-                .isActive(true)
-                .build());
+        if (!userRepository.existsByEmail("chef@stockchef.com")) {
+            userRepository.save(User.builder()
+                    .email("chef@stockchef.com")
+                    .password(passwordEncoder.encode("chefpass123"))
+                    .firstName("Maria")
+                    .lastName("Rodriguez")
+                    .role(UserRole.ROLE_CHEF)
+                    .isActive(true)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .createdBy("system")
+                    .build());
+        }
 
-        // Employee
-        userRepository.save(User.builder()
-                .email("employee@stockchef.com")
-                .password(passwordEncoder.encode("emppass123"))
-                .firstName("Pedro")
-                .lastName("Martinez")
-                .role(UserRole.ROLE_EMPLOYEE)
-                .isActive(true)
-                .build());
+        if (!userRepository.existsByEmail("employee@stockchef.com")) {
+            userRepository.save(User.builder()
+                    .email("employee@stockchef.com")
+                    .password(passwordEncoder.encode("emppass123"))
+                    .firstName("Pedro")
+                    .lastName("Martinez")
+                    .role(UserRole.ROLE_EMPLOYEE)
+                    .isActive(true)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .createdBy("system")
+                    .build());
+        }
     }
 }

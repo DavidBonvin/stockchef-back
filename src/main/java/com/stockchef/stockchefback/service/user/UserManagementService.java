@@ -145,9 +145,17 @@ public class UserManagementService {
         log.info("Mise à jour rôle utilisateur ID: {} vers {} par utilisateur: {}, raison: {}", 
                 userId, newRole, requester.getEmail(), reason);
 
-        // Solo admins pueden cambiar roles
-        if (requester.getRole() != UserRole.ROLE_ADMIN) {
-            throw new UnauthorizedUserException("Seuls les administrateurs peuvent changer les rôles d'utilisateur");
+        // Validación de permisos de cambio de rol
+        UserRole requesterRole = requester.getRole();
+        
+        // Solo ADMIN y DEVELOPER pueden cambiar roles
+        if (requesterRole != UserRole.ROLE_ADMIN && requesterRole != UserRole.ROLE_DEVELOPER) {
+            throw new UnauthorizedUserException("Seuls les administrateurs et développeurs peuvent changer les rôles d'utilisateur");
+        }
+        
+        // ADMIN no puede crear DEVELOPER
+        if (requesterRole == UserRole.ROLE_ADMIN && newRole == UserRole.ROLE_DEVELOPER) {
+            throw new UnauthorizedUserException("Les administrateurs ne peuvent pas créer de développeurs");
         }
 
         User user = userRepository.findById(userId)

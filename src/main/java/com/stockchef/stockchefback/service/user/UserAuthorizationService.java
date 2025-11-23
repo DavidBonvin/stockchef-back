@@ -79,11 +79,19 @@ public class UserAuthorizationService {
 
     /**
      * Obtient le rôle effectif de l'utilisateur
+     * - Si actif: retourne le rôle normal
+     * - Si inactif: retourne ROLE_EMPLOYEE (rôle dégradé)
      */
     public UserRole getEffectiveRole(User user) {
-        if (user == null || !user.getIsActive()) {
+        if (user == null) {
             return null;
         }
+        
+        // Si l'utilisateur est inactif, il est dégradé au rôle EMPLOYEE
+        if (!user.getIsActive()) {
+            return UserRole.ROLE_EMPLOYEE;
+        }
+        
         return user.getRole();
     }
 

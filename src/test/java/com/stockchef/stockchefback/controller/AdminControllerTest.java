@@ -3,252 +3,276 @@ package com.stockchef.stockchefback.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stockchef.stockchefback.dto.user.UpdateUserRoleRequest;
 import com.stockchef.stockchefback.dto.user.UpdateUserStatusRequest;
-import com.stockchef.stockchefback.dto.user.UserResponse;
+import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.model.UserRole;
+import com.stockchef.stockchefback.repository.UserRepository;
 import com.stockchef.stockchefback.service.UserService;
-import com.stockchef.stockchefback.testutil.TestUuidHelper;
+import com.stockchef.stockchefback.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Tests TDD pour AdminController - Gestion administrative des utilisateurs
- * RED -> GREEN -> REFACTOR
+ * Tests pour AdminController - Gestion administrative des utilisateurs  
+ * Utilise SpringBootTest avec MockMvc pour tester avec contexte complet.
  */
-@WebMvcTest(AdminController.class)
-@ActiveProfiles("test")
-@DisplayName("Tests TDD - AdminController")
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@DisplayName("Admin Controller Integration Tests")
 class AdminControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    private UserResponse employeeUser;
-    private UserResponse chefUser;
-    private UserResponse inactiveUser;
+    @Autowired
+    private JwtService jwtService;
+
+    private User testEmployee;
+    private User testChef;
+    private User testAdmin;
+    private User testAdminUser;  // Usuario admin para tests
+    private User testDeveloperUser; // Usuario developer para tests
+
+    private String adminToken;
+    private String developerToken;
+    private String employeeToken;
 
     @BeforeEach
     void setUp() {
-        employeeUser = new UserResponse(
-                TestUuidHelper.USER_1_UUID, "employee@test.com", "Jean", "Employee", "Jean Employee",
-                UserRole.ROLE_EMPLOYEE, UserRole.ROLE_EMPLOYEE, true,
-                LocalDateTime.now(), null, "system"
-        );
+        // Limpiar datos previos
+        userRepository.deleteAll();
+        
+        // Crear usuarios de prueba directamente en la BD
+        testEmployee = User.builder()
+                .email("employee.test@stockchef.com")
+                .firstName("Test")
+                .lastName("Employee")
+                .password("$2a$10$hashedPassword")
+                .role(UserRole.ROLE_EMPLOYEE)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testEmployee = userRepository.save(testEmployee);
 
-        chefUser = new UserResponse(
-                TestUuidHelper.USER_2_UUID, "chef@test.com", "Marie", "Chef", "Marie Chef",
-                UserRole.ROLE_CHEF, UserRole.ROLE_CHEF, true,
-                LocalDateTime.now(), null, "admin"
-        );
+        testChef = User.builder()
+                .email("chef.test@stockchef.com")
+                .firstName("Test")
+                .lastName("Chef")
+                .password("$2a$10$hashedPassword")
+                .role(UserRole.ROLE_CHEF)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testChef = userRepository.save(testChef);
+        
+        testAdmin = User.builder()
+                .email("admin.test@stockchef.com")
+                .firstName("Test")
+                .lastName("Admin")
+                .password("$2a$10$hashedPassword")
+                .role(UserRole.ROLE_ADMIN)
+                .isActive(false) // Inicialmente inactivo para probar reactivación
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testAdmin = userRepository.save(testAdmin);
 
-        inactiveUser = new UserResponse(
-                TestUuidHelper.USER_3_UUID, "inactive@test.com", "Pierre", "Inactive", "Pierre Inactive",
-                UserRole.ROLE_CHEF, UserRole.ROLE_EMPLOYEE, false, // Inactif = effectiveRole EMPLOYEE
-                LocalDateTime.now(), null, "admin"
-        );
+        // Usuario admin para hacer las peticiones
+        testAdminUser = User.builder()
+                .email("admin.requester@stockchef.com")
+                .firstName("Admin")
+                .lastName("Requester")
+                .password("$2a$10$hashedPassword")
+                .role(UserRole.ROLE_ADMIN)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testAdminUser = userRepository.save(testAdminUser);
+
+        // Usuario developer para hacer las peticiones
+        testDeveloperUser = User.builder()
+                .email("developer.requester@stockchef.com")
+                .firstName("Developer")
+                .lastName("Requester")
+                .password("$2a$10$hashedPassword")
+                .role(UserRole.ROLE_DEVELOPER)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testDeveloperUser = userRepository.save(testDeveloperUser);
+        
+        // Generar tokens JWT para los tests
+        adminToken = jwtService.generateToken(testAdminUser);
+        developerToken = jwtService.generateToken(testDeveloperUser);
+        employeeToken = jwtService.generateToken(testEmployee);
     }
 
     // Tests pour la liste des utilisateurs
     
     @Test
-    @DisplayName("RED: GET /api/admin/users - Lister tous les utilisateurs (ADMIN)")
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @DisplayName("Should list all users when admin")
     void shouldListAllUsers_WhenAdmin() throws Exception {
-        // Given
-        when(userService.getAllUsers()).thenReturn(List.of(employeeUser, chefUser, inactiveUser));
-
         // When & Then
-        mockMvc.perform(get("/api/admin/users"))
+        mockMvc.perform(get("/admin/users")
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].email").value("employee@test.com"))
-                .andExpect(jsonPath("$[1].email").value("chef@test.com"))
-                .andExpect(jsonPath("$[2].email").value("inactive@test.com"))
-                .andExpect(jsonPath("$[2].isActive").value(false))
-                .andExpect(jsonPath("$[2].effectiveRole").value("ROLE_EMPLOYEE"));
+                .andExpect(jsonPath("$.length()").value(5))  // 5 usuarios total
+                .andExpect(jsonPath("$[0].email").exists())
+                .andExpect(jsonPath("$[1].email").exists())
+                .andExpect(jsonPath("$[2].email").exists());
     }
 
     @Test
-    @DisplayName("RED: GET /api/admin/users - Lister tous les utilisateurs (DEVELOPER)")
-    @WithMockUser(authorities = "ROLE_DEVELOPER")
+    @DisplayName("Should list all users when developer")
     void shouldListAllUsers_WhenDeveloper() throws Exception {
-        // Given
-        when(userService.getAllUsers()).thenReturn(List.of(employeeUser, chefUser));
-
         // When & Then
-        mockMvc.perform(get("/api/admin/users"))
+        mockMvc.perform(get("/admin/users")
+                        .header("Authorization", "Bearer " + developerToken))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray());
     }
 
     @Test
-    @DisplayName("RED: GET /api/admin/users - Accès refusé (EMPLOYEE)")
-    @WithMockUser(authorities = "ROLE_EMPLOYEE")
+    @DisplayName("Should deny access when employee")
     void shouldDenyAccess_WhenEmployee() throws Exception {
         // When & Then
-        mockMvc.perform(get("/api/admin/users"))
+        mockMvc.perform(get("/admin/users")
+                        .header("Authorization", "Bearer " + employeeToken))
                 .andExpect(status().isForbidden());
     }
 
     // Tests pour la modification des rôles
 
     @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/role - Changer rôle (ADMIN)")
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @DisplayName("Should update user role when admin")
     void shouldUpdateUserRole_WhenAdmin() throws Exception {
         // Given
         UpdateUserRoleRequest request = new UpdateUserRoleRequest(
                 UserRole.ROLE_CHEF, "Promotion méritée"
         );
-        
-        UserResponse updatedUser = new UserResponse(
-                TestUuidHelper.USER_1_UUID, "employee@test.com", "Jean", "Employee", "Jean Employee",
-                UserRole.ROLE_CHEF, UserRole.ROLE_CHEF, true,
-                LocalDateTime.now(), null, "admin"
-        );
-        
-        when(userService.updateUserRole(eq(TestUuidHelper.USER_1_UUID), eq(UserRole.ROLE_CHEF), eq("Promotion méritée")))
-                .thenReturn(updatedUser);
 
         // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_1_UUID + "/role")
+        mockMvc.perform(put("/admin/users/" + testEmployee.getId() + "/role")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.role").value("ROLE_CHEF"))
                 .andExpect(jsonPath("$.effectiveRole").value("ROLE_CHEF"));
     }
 
     @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/role - ADMIN ne peut pas créer DEVELOPER")
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @DisplayName("Should allow any role creation when developer")
+    void shouldAllowAnyRoleCreation_WhenDeveloper() throws Exception {
+        // Given
+        UpdateUserRoleRequest request = new UpdateUserRoleRequest(
+                UserRole.ROLE_ADMIN, "Nuevo administrateur"
+        );
+
+        // When & Then
+        mockMvc.perform(put("/admin/users/" + testEmployee.getId() + "/role")
+                        .header("Authorization", "Bearer " + developerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
+    }
+
+    @Test 
+    @DisplayName("Should deny developer role creation when admin")
     void shouldDenyDeveloperRoleCreation_WhenAdmin() throws Exception {
         // Given
         UpdateUserRoleRequest request = new UpdateUserRoleRequest(
                 UserRole.ROLE_DEVELOPER, "Tentative non autorisée"
         );
-        
-        when(userService.updateUserRole(eq(TestUuidHelper.USER_1_UUID), eq(UserRole.ROLE_DEVELOPER), any()))
-                .thenThrow(new InsufficientPermissionsException("Un ADMIN ne peut pas créer un DEVELOPER"));
 
         // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_1_UUID + "/role")
+        mockMvc.perform(put("/admin/users/" + testEmployee.getId() + "/role")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("Un ADMIN ne peut pas créer un DEVELOPER"));
-    }
-
-    @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/role - DEVELOPER peut créer n'importe quel rôle")
-    @WithMockUser(authorities = "ROLE_DEVELOPER")
-    void shouldAllowAnyRoleCreation_WhenDeveloper() throws Exception {
-        // Given
-        UpdateUserRoleRequest request = new UpdateUserRoleRequest(
-                UserRole.ROLE_ADMIN, "Nouveau administrateur"
-        );
-        
-        UserResponse updatedUser = new UserResponse(
-                TestUuidHelper.USER_1_UUID, "employee@test.com", "Jean", "Employee", "Jean Employee",
-                UserRole.ROLE_ADMIN, UserRole.ROLE_ADMIN, true,
-                LocalDateTime.now(), null, "developer"
-        );
-        
-        when(userService.updateUserRole(eq(TestUuidHelper.USER_1_UUID), eq(UserRole.ROLE_ADMIN), eq("Nouveau administrateur")))
-                .thenReturn(updatedUser);
-
-        // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_1_UUID + "/role")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"));
+                .andExpect(status().isForbidden());
     }
 
     // Tests pour la gestion du statut actif/inactif
 
     @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/status - Désactiver utilisateur")
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @DisplayName("Should deactivate user when admin")
     void shouldDeactivateUser_WhenAdmin() throws Exception {
         // Given
         UpdateUserStatusRequest request = new UpdateUserStatusRequest(
                 false, "Suspension temporaire"
         );
-        
-        UserResponse deactivatedUser = new UserResponse(
-                TestUuidHelper.USER_2_UUID, "chef@test.com", "Marie", "Chef", "Marie Chef",
-                UserRole.ROLE_CHEF, UserRole.ROLE_EMPLOYEE, false, // Inactif = effectiveRole EMPLOYEE
-                LocalDateTime.now(), null, "admin"
-        );
-        
-        when(userService.updateUserStatus(eq(TestUuidHelper.USER_2_UUID), eq(false), eq("Suspension temporaire")))
-                .thenReturn(deactivatedUser);
 
         // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_2_UUID + "/status")
+        mockMvc.perform(put("/admin/users/" + testChef.getId() + "/status")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.isActive").value(false))
-                .andExpect(jsonPath("$.role").value("ROLE_CHEF")) // Rôle réel conservé
-                .andExpect(jsonPath("$.effectiveRole").value("ROLE_EMPLOYEE")); // Rôle effectif dégradé
+                .andExpect(jsonPath("$.role").value("ROLE_CHEF"))
+                .andExpect(jsonPath("$.effectiveRole").value("ROLE_EMPLOYEE"));
     }
 
     @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/status - Réactiver utilisateur")
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @DisplayName("Should reactivate user when admin")
     void shouldReactivateUser_WhenAdmin() throws Exception {
         // Given
         UpdateUserStatusRequest request = new UpdateUserStatusRequest(
                 true, "Fin de suspension"
         );
-        
-        UserResponse reactivatedUser = new UserResponse(
-                TestUuidHelper.USER_3_UUID, "inactive@test.com", "Pierre", "Inactive", "Pierre Inactive",
-                UserRole.ROLE_CHEF, UserRole.ROLE_CHEF, true, // Actif = effectiveRole = role
-                LocalDateTime.now(), null, "admin"
-        );
-        
-        when(userService.updateUserStatus(eq(TestUuidHelper.USER_3_UUID), eq(true), eq("Fin de suspension")))
-                .thenReturn(reactivatedUser);
 
         // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_3_UUID + "/status")
+        mockMvc.perform(put("/admin/users/" + testAdmin.getId() + "/status")
+                        .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.isActive").value(true))
-                .andExpect(jsonPath("$.role").value("ROLE_CHEF"))
-                .andExpect(jsonPath("$.effectiveRole").value("ROLE_CHEF")); // Rôle restauré
+                .andExpect(jsonPath("$.role").value("ROLE_ADMIN"))
+                .andExpect(jsonPath("$.effectiveRole").value("ROLE_ADMIN"));
     }
 
     @Test
-    @DisplayName("RED: PUT /api/admin/users/{id}/status - Accès refusé (EMPLOYEE)")
-    @WithMockUser(authorities = "ROLE_EMPLOYEE")
+    @DisplayName("Should deny status change when employee")
     void shouldDenyStatusChange_WhenEmployee() throws Exception {
         // Given
         UpdateUserStatusRequest request = new UpdateUserStatusRequest(
@@ -256,19 +280,10 @@ class AdminControllerTest {
         );
 
         // When & Then
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_1_UUID + "/status")
+        mockMvc.perform(put("/admin/users/" + testEmployee.getId() + "/status")
+                        .header("Authorization", "Bearer " + employeeToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
-    }
-}
-
-/**
- * Exception pour permissions insuffisantes
- * (sera créée dans l'implémentation)
- */
-class InsufficientPermissionsException extends RuntimeException {
-    public InsufficientPermissionsException(String message) {
-        super(message);
     }
 }

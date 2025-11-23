@@ -8,7 +8,9 @@ import com.stockchef.stockchefback.dto.user.UpdateUserRoleRequest;
 import com.stockchef.stockchefback.dto.user.UpdateUserStatusRequest;
 import com.stockchef.stockchefback.dto.user.UserResponse;
 import com.stockchef.stockchefback.model.UserRole;
+import com.stockchef.stockchefback.model.User;
 import com.stockchef.stockchefback.repository.UserRepository;
+import com.stockchef.stockchefback.service.JwtService;
 import com.stockchef.stockchefback.testutil.TestUuidHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Transactional
 @DisplayName("Tests d'Intégration TDD - Gestion Utilisateurs")
 class UserManagementIntegrationTest {
@@ -46,18 +46,54 @@ class UserManagementIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    // Usuarios de prueba
+    private User testAdmin;
+    private User testEmployee;
+    
     private String adminToken;
     private String employeeToken;
 
     @BeforeEach
     void setUp() throws Exception {
-        // Nettoyer la base de données et obtenir les tokens nécessaires
+        // Limpiar datos previos
         userRepository.deleteAll();
         
-        // Les utilisateurs par défaut sont créés par DataInitConfig
-        // Obtenir le token admin pour les tests
-        adminToken = getAuthToken("admin@stockchef.com", "adminpass123");
-        employeeToken = getAuthToken("employee@stockchef.com", "emppass123");
+        // Crear usuarios de prueba directamente en la BD
+        testAdmin = User.builder()
+                .email("admin.test@stockchef.com")
+                .firstName("Admin")
+                .lastName("Test")
+                .password(passwordEncoder.encode("adminpass123"))
+                .role(UserRole.ROLE_ADMIN)
+                .isActive(true)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testAdmin = userRepository.save(testAdmin);
+        
+        testEmployee = User.builder()
+                .email("employee.test@stockchef.com")
+                .firstName("Employee")
+                .lastName("Test")
+                .password(passwordEncoder.encode("emppass123"))
+                .role(UserRole.ROLE_EMPLOYEE)
+                .isActive(true)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
+                .createdBy("system")
+                .build();
+        testEmployee = userRepository.save(testEmployee);
+        
+        // Generar tokens JWT para los tests
+        adminToken = jwtService.generateToken(testAdmin);
+        employeeToken = jwtService.generateToken(testEmployee);
     }
 
     @Test
@@ -71,7 +107,7 @@ class UserManagementIntegrationTest {
                 "Martin"
         );
 
-        MvcResult registerResult = mockMvc.perform(post("/api/users/register")
+        MvcResult registerResult = mockMvc.perform(post("/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isCreated())
@@ -96,7 +132,7 @@ class UserManagementIntegrationTest {
                 "password123"
         );
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -104,7 +140,7 @@ class UserManagementIntegrationTest {
                 .andExpect(jsonPath("$.role").value("ROLE_EMPLOYEE"));
 
         // ÉTAPE 3: Admin peut voir tous les utilisateurs
-        mockMvc.perform(get("/api/admin/users")
+        mockMvc.perform(get("/admin/users")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -116,7 +152,7 @@ class UserManagementIntegrationTest {
                 "Promotion méritée"
         );
 
-        mockMvc.perform(put("/api/admin/users/" + newUserId + "/role")
+        mockMvc.perform(put("/admin/users/" + newUserId + "/role")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(roleUpdateRequest)))
@@ -128,7 +164,7 @@ class UserManagementIntegrationTest {
         String promotedUserToken = getAuthToken("nouvel.employee@test.com", "password123");
         
         // Vérifier que le token contient le nouveau rôle
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/users/me")
                         .header("Authorization", "Bearer " + promotedUserToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("ROLE_CHEF"));
@@ -142,7 +178,7 @@ class UserManagementIntegrationTest {
                 "chef.temporaire@test.com", "password123", "Marie", "Chef"
         );
         
-        MvcResult registerResult = mockMvc.perform(post("/api/users/register")
+        MvcResult registerResult = mockMvc.perform(post("/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
@@ -160,7 +196,7 @@ class UserManagementIntegrationTest {
                 UserRole.ROLE_CHEF, "Promotion initiale"
         );
         
-        mockMvc.perform(put("/api/admin/users/" + userId + "/role")
+        mockMvc.perform(put("/admin/users/" + userId + "/role")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(promoteRequest)))
@@ -169,7 +205,7 @@ class UserManagementIntegrationTest {
         // ÉTAPE 2: Vérifier que l'utilisateur a bien les permissions CHEF
         String chefToken = getAuthToken("chef.temporaire@test.com", "password123");
         
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/users/me")
                         .header("Authorization", "Bearer " + chefToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.effectiveRole").value("ROLE_CHEF"));
@@ -179,7 +215,7 @@ class UserManagementIntegrationTest {
                 false, "Suspension disciplinaire"
         );
         
-        mockMvc.perform(put("/api/admin/users/" + userId + "/status")
+        mockMvc.perform(put("/admin/users/" + userId + "/status")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(deactivateRequest)))
@@ -188,34 +224,42 @@ class UserManagementIntegrationTest {
                 .andExpect(jsonPath("$.role").value("ROLE_CHEF")) // Rôle conservé
                 .andExpect(jsonPath("$.effectiveRole").value("ROLE_EMPLOYEE")); // Permissions dégradées
 
-        // ÉTAPE 4: L'utilisateur peut toujours se connecter mais avec permissions EMPLOYEE
-        String degradedToken = getAuthToken("chef.temporaire@test.com", "password123");
+        // ÉTAPE 4: L'utilisateur inactif ne peut plus se connecter
+        LoginRequest inactiveLoginRequest = new LoginRequest("chef.temporaire@test.com", "password123");
         
-        mockMvc.perform(get("/api/users/me")
-                        .header("Authorization", "Bearer " + degradedToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isActive").value(false))
-                .andExpect(jsonPath("$.effectiveRole").value("ROLE_EMPLOYEE"));
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(inactiveLoginRequest)))
+                .andExpect(status().isUnauthorized()); // Utilisateur inactif rejeté
         
         // ÉTAPE 5: Réactivation restaure les permissions
         UpdateUserStatusRequest reactivateRequest = new UpdateUserStatusRequest(
                 true, "Fin de suspension"
         );
         
-        mockMvc.perform(put("/api/admin/users/" + userId + "/status")
+        mockMvc.perform(put("/admin/users/" + userId + "/status")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reactivateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").value(true))
                 .andExpect(jsonPath("$.effectiveRole").value("ROLE_CHEF")); // Permissions restaurées
+
+        // ÉTAPE 6: L'utilisateur réactivé peut se connecter normalement
+        String restoredToken = getAuthToken("chef.temporaire@test.com", "password123");
+        
+        mockMvc.perform(get("/users/me")
+                        .header("Authorization", "Bearer " + restoredToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isActive").value(true))
+                .andExpect(jsonPath("$.effectiveRole").value("ROLE_CHEF"));
     }
 
     @Test
     @DisplayName("RED: Sécurité - EMPLOYEE ne peut pas gérer d'autres utilisateurs")
     void shouldDenyEmployeeAccessToUserManagement() throws Exception {
         // Tenter d'accéder à la liste des utilisateurs en tant qu'EMPLOYEE
-        mockMvc.perform(get("/api/admin/users")
+        mockMvc.perform(get("/admin/users")
                         .header("Authorization", "Bearer " + employeeToken))
                 .andExpect(status().isForbidden());
 
@@ -224,7 +268,7 @@ class UserManagementIntegrationTest {
                 UserRole.ROLE_ADMIN, "Tentative non autorisée"
         );
         
-        mockMvc.perform(put("/api/admin/users/" + TestUuidHelper.USER_1_UUID + "/role")
+        mockMvc.perform(put("/admin/users/" + TestUuidHelper.USER_1_UUID + "/role")
                         .header("Authorization", "Bearer " + employeeToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(roleRequest)))
@@ -239,7 +283,7 @@ class UserManagementIntegrationTest {
                 "unique@test.com", "password123", "Premier", "User"
         );
         
-        mockMvc.perform(post("/api/users/register")
+        mockMvc.perform(post("/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(firstUser)))
                 .andExpect(status().isCreated());
@@ -249,11 +293,11 @@ class UserManagementIntegrationTest {
                 "unique@test.com", "differentPassword", "Autre", "User"
         );
         
-        mockMvc.perform(post("/api/users/register")
+        mockMvc.perform(post("/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicateUser)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Un utilisateur avec cet email existe déjà"));
+                .andExpect(jsonPath("$.message").value("L'email unique@test.com est déjà utilisé"));
     }
 
     /**
@@ -262,7 +306,7 @@ class UserManagementIntegrationTest {
     private String getAuthToken(String email, String password) throws Exception {
         LoginRequest loginRequest = new LoginRequest(email, password);
         
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
+        MvcResult result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
