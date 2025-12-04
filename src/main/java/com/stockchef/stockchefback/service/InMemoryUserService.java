@@ -14,9 +14,10 @@ import java.util.Optional;
 
 /**
  * Service temporaire pour gérer les utilisateurs en mémoire
+ * DÉSACTIVÉ - Causait des conflits de beans avec UserService
  * Remplace la fonctionnalité de JPA pendant qu'on résout les problèmes de configuration
  */
-@Service
+// @Service - COMMENTÉ POUR ÉVITER CONFLITS
 @RequiredArgsConstructor
 @Slf4j
 public class InMemoryUserService {

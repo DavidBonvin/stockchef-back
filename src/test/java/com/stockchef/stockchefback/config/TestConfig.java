@@ -16,9 +16,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Configuration de test pour résoudre les problèmes d'injection de dépendances
+ * DÉSACTIVÉE - Causait des conflits de beans
  */
-@TestConfiguration
-@Profile("test")
+// @TestConfiguration - COMMENTÉ POUR ÉVITER CONFLITS
+// @Profile("test")
 public class TestConfig {
 
     @Bean

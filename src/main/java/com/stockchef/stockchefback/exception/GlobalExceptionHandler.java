@@ -1,6 +1,7 @@
 package com.stockchef.stockchefback.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,6 +18,7 @@ import java.util.Map;
  * Convertit les exceptions en réponses HTTP appropriées
  */
 @RestControllerAdvice
+@Order(2) // Priorité inférieure aux gestionnaires spécialisés
 @Slf4j
 public class GlobalExceptionHandler {
 

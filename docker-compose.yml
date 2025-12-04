@@ -6,7 +6,7 @@ services:
     ports:
       - "8090:8090"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker-${DATABASE_TYPE:-mysql}
+      - SPRING_PROFILES_ACTIVE=postgresql
       - JAVA_OPTS=-Xmx1024m -Xms512m
     networks:
       - stockchef-network
@@ -40,7 +40,7 @@ services:
 
   # Base de données PostgreSQL
   postgres:
-    image: postgres:18
+    image: postgres:15
     container_name: stockchef-postgres
     environment:
       POSTGRES_DB: stockchef_db
