@@ -22,13 +22,11 @@ public class WebConfig implements WebMvcConfigurer {
                     // Producción (añadir tu URL de frontend aquí)
                     "https://stockchef-front.vercel.app",
                     "https://*.vercel.app",
-                    "https://*.netlify.app",
-                    // Permitir todas las origenes para testing (temporal)
-                    "*"
+                    "https://*.netlify.app"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(false) // Cambiar a false cuando uses "*" en origins
+                //.allowedHeaders("*")
+                .allowCredentials(true) // Cambiar a false cuando uses "*" en origins
                 .maxAge(3600);
     }
 }
