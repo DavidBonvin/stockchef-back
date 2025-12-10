@@ -19,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -133,5 +135,17 @@ public class AuthController {
             log.error("Erreur durant logout pour utilisateur {}: {}", userEmail, e.getMessage());
             throw e;
         }
+    }
+    
+    /**
+     * Endpoint de test pour informes - Temporal
+     */
+    @GetMapping("/test-reports")
+    public ResponseEntity<?> testReports() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Endpoint de reports funcionando desde AuthController!");
+        response.put("timestamp", java.time.LocalDateTime.now());
+        response.put("status", "OK");
+        return ResponseEntity.ok(response);
     }
 }

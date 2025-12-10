@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,4 +155,19 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
         """)
     List<Object[]> getStatistiquesParChef(@Param("dateDebut") LocalDate dateDebut, 
                                          @Param("dateFin") LocalDate dateFin);
+    
+    /**
+     * Cuenta menús por estatus después de una fecha
+     */
+    @Query("SELECT COUNT(m) FROM Menu m WHERE m.statut = :statut AND m.dateService >= :startDate")
+    Integer countByStatutAndDateServiceAfter(@Param("statut") StatutMenu statut, 
+                                           @Param("startDate") LocalDateTime startDate);
+    
+    /**
+     * Encuentra menús en un rango de fechas con estados específicos
+     */
+    @Query("SELECT m FROM Menu m WHERE m.dateService BETWEEN :startDate AND :endDate AND m.statut IN :statuts")
+    List<Menu> findByDateServiceBetweenAndStatutIn(@Param("startDate") LocalDateTime startDate,
+                                                  @Param("endDate") LocalDateTime endDate,
+                                                  @Param("statuts") List<StatutMenu> statuts);
 }

@@ -60,6 +60,94 @@ public class ProduitController {
     }
     
     /**
+     * Endpoint de informes - Resumen básico de inventario
+     */
+    @GetMapping("/inventory-summary")
+    @PreAuthorize("hasAnyRole('CHEF', 'ADMIN', 'DEVELOPER', 'ASSISTANT')")
+    public ResponseEntity<java.util.Map<String, Object>> getInventorySummary() {
+        java.util.Map<String, Object> summary = new java.util.HashMap<>();
+        
+        List<ProduitResponse> allProducts = produitService.getAllProduits();
+        
+        summary.put("status", "success");
+        summary.put("totalProduits", allProducts.size());
+        summary.put("message", "Resumen de inventario generado");
+        summary.put("timestamp", java.time.LocalDateTime.now());
+        summary.put("products", allProducts);
+        
+        return ResponseEntity.ok(summary);
+    }
+    
+    /**
+     * Endpoint de informes - Productos próximos a expirar
+     */
+    @GetMapping("/expiring-soon")
+    @PreAuthorize("hasAnyRole('CHEF', 'ADMIN', 'DEVELOPER', 'ASSISTANT')")
+    public ResponseEntity<java.util.Map<String, Object>> getExpiringProducts(
+            @RequestParam(defaultValue = "7") int days) {
+        
+        java.util.Map<String, Object> report = new java.util.HashMap<>();
+        List<ProduitResponse> allProducts = produitService.getAllProduits();
+        
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate limitDate = today.plusDays(days);
+        
+        List<ProduitResponse> expiringProducts = allProducts.stream()
+            .filter(p -> p.datePeremption() != null && 
+                        p.datePeremption().isBefore(limitDate) && 
+                        !p.datePeremption().isBefore(today))
+            .collect(java.util.stream.Collectors.toList());
+        
+        report.put("status", "success");
+        report.put("message", "Productos próximos a expirar en " + days + " días");
+        report.put("daysFilter", days);
+        report.put("today", today);
+        report.put("limitDate", limitDate);
+        report.put("totalProductsExpiring", expiringProducts.size());
+        report.put("expiringProducts", expiringProducts);
+        report.put("timestamp", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
+    }
+    
+    /**
+     * Endpoint de informes - Estadísticas por unidad
+     */
+    @GetMapping("/stats-by-unit")
+    @PreAuthorize("hasAnyRole('CHEF', 'ADMIN', 'DEVELOPER', 'ASSISTANT')")
+    public ResponseEntity<java.util.Map<String, Object>> getStatsByUnit() {
+        
+        java.util.Map<String, Object> report = new java.util.HashMap<>();
+        List<ProduitResponse> allProducts = produitService.getAllProduits();
+        
+        java.util.Map<String, java.util.List<ProduitResponse>> productsByUnit = allProducts.stream()
+            .collect(java.util.stream.Collectors.groupingBy(
+                product -> product.unite().name()
+            ));
+        
+        java.util.Map<String, Object> unitStats = new java.util.HashMap<>();
+        productsByUnit.forEach((unit, products) -> {
+            java.util.Map<String, Object> stats = new java.util.HashMap<>();
+            stats.put("count", products.size());
+            stats.put("totalStock", products.stream()
+                .mapToDouble(p -> p.quantiteStock().doubleValue())
+                .sum());
+            stats.put("averagePrice", products.stream()
+                .mapToDouble(p -> p.prixUnitaire().doubleValue())
+                .average().orElse(0.0));
+            unitStats.put(unit, stats);
+        });
+        
+        report.put("status", "success");
+        report.put("message", "Estadísticas por unidad de medida");
+        report.put("totalUnits", unitStats.size());
+        report.put("unitStatistics", unitStats);
+        report.put("timestamp", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
+    }
+    
+    /**
      * Détails d'un produit par ID
      */
     @GetMapping("/{id}")

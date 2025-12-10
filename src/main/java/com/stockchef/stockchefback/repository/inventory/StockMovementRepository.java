@@ -68,4 +68,20 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
     List<StockMovement> findByProduitAndDateRange(@Param("produitId") Long produitId,
                                                 @Param("startDate") LocalDateTime startDate,
                                                 @Param("endDate") LocalDateTime endDate);
+    
+    /**
+     * Encuentra movimientos por tipo y rango de fechas
+     */
+    @Query("SELECT sm FROM StockMovement sm WHERE sm.typeMouvement = :typeMouvement " +
+           "AND sm.dateMouvement BETWEEN :startDate AND :endDate " +
+           "ORDER BY sm.dateMouvement DESC")
+    List<StockMovement> findByDateMouvementBetweenAndTypeMouvement(@Param("startDate") LocalDateTime startDate,
+                                                                 @Param("endDate") LocalDateTime endDate,
+                                                                 @Param("typeMouvement") TypeMouvement typeMouvement);
+    
+    /**
+     * Cuenta movimientos después de una fecha específica
+     */
+    @Query("SELECT COUNT(sm) FROM StockMovement sm WHERE sm.dateMouvement >= :startDate")
+    Integer countByDateMouvementAfter(@Param("startDate") LocalDateTime startDate);
 }

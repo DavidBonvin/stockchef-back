@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -63,4 +64,51 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
      */
     @Query("SELECT p FROM Produit p WHERE p.deleted = false AND p.unite = :unite")
     List<Produit> findByUnite(@Param("unite") String unite);
+    
+    /**
+     * Compte les produits actifs (non supprimés)
+     */
+    @Query("SELECT COUNT(p) FROM Produit p WHERE p.deleted = false OR p.deleted IS NULL")
+    Integer countByDeletedFalse();
+    
+    /**
+     * Compte les produits en alerte de stock
+     */
+    @Query("SELECT COUNT(p) FROM Produit p WHERE p.deleted = false AND p.quantiteStock < p.seuilAlerte")
+    Integer countProduitsWithLowStock();
+    
+    /**
+     * Compte les produits expirant dans X jours
+     */
+    @Query("SELECT COUNT(p) FROM Produit p WHERE p.deleted = false AND p.datePeremption IS NOT NULL " +
+           "AND p.datePeremption <= :dateLimit")
+    Integer countProduitsExpiringInDays(@Param("dateLimit") LocalDate dateLimit);
+    
+    /**
+     * Métodos sobrecargados para facilitar el uso
+     */
+    default Integer countProduitsExpiringInDays(int days) {
+        LocalDate dateLimit = LocalDate.now().plusDays(days);
+        return countProduitsExpiringInDays(dateLimit);
+    }
+    
+    /**
+     * Encuentra productos que han expirado en un período específico
+     */
+    @Query("SELECT p FROM Produit p WHERE p.deleted = false AND p.datePeremption IS NOT NULL " +
+           "AND p.datePeremption >= :startDate AND p.datePeremption <= :endDate")
+    List<Produit> findExpiredProductsInPeriod(@Param("startDate") LocalDateTime startDate, 
+                                             @Param("endDate") LocalDateTime endDate);
+    
+    /**
+     * Encuentra productos en alerte de stock
+     */
+    @Query("SELECT p FROM Produit p WHERE p.deleted = false AND p.quantiteStock < p.seuilAlerte")
+    List<Produit> findProduitsWithLowStock();
+    
+    /**
+     * Cuenta productos creados después de una fecha
+     */
+    @Query("SELECT COUNT(p) FROM Produit p WHERE p.deleted = false AND p.dateEntree >= :startDate")
+    Integer countByDateEntreeAfter(@Param("startDate") LocalDateTime startDate);
 }
