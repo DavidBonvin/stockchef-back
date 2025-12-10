@@ -13,20 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                    // Desarrollo local
-                    "http://localhost:3000", 
-                    "http://localhost:4200", 
-                    "http://localhost:5173",
-                    "http://localhost:5173/",
-                    // Producción (añadir tu URL de frontend aquí)
-                    "https://stockchef-front.vercel.app",
-                    "https://*.vercel.app",
-                    "https://*.netlify.app"
-                )
+                .allowedOrigins("http://localhost:3000", "http://localhost:4200", "http://localhost:5173")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                //.allowedHeaders("*")
-                .allowCredentials(true) // Cambiar a false cuando uses "*" en origins
-                .maxAge(3600);
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
