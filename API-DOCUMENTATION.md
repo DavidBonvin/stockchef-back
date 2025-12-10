@@ -77,11 +77,12 @@ Authorization: Bearer <your-jwt-token>
 - **Autenticación JWT**: Login, refresh token, roles jerárquicos
 - **Gestión de Inventario**: CRUD productos, alertas de stock, soft delete
 - **Gestión de Menús**: CRUD completo verificado (5/5 endpoints principales)
+- **Gestión de Usuarios**: CRUD básico verificado (6/10 endpoints principales)  
 - **Reportes y Analytics**: 8/11 endpoints de informes funcionando  
 - **Health Monitoring**: Endpoints de salud para Railway
 
 ### 🔄 Módulos Parcialmente Funcionales  
-- **Gestión de Usuarios**: CRUD básico (necesita más testing)
+- **Gestión de Usuarios**: Password management endpoints (necesita más testing)
 - **Movimientos de Stock**: Tracking disponible (requiere más funcionalidades)
 - **Estadísticas Avanzadas**: 3 endpoints con Error 500 pendientes
 
@@ -107,7 +108,7 @@ Authorization: Bearer <your-jwt-token>
 | Contrôleur | Base Path | Description |
 |------------|-----------|-------------|
 | **AuthController** | `/auth` | Authentification (login, refresh, logout) |
-| **UserController** | `/users` | Gestion des utilisateurs (inscription, profil, mot de passe) |
+| **UserController** | `/users` | Gestion des utilisateurs ✅ 6/10 endpoints |
 | **AdminController** | `/admin` | Administration (gestion rôles/statut utilisateurs) |
 | **ProduitController** | `/inventory/produits` | Gestion complète de l'inventaire ✅ 8/11 endpoints |
 | **MenuController** | `/menus` | Gestion des menus et recettes ✅ 5/5 endpoints CRUD |
@@ -169,22 +170,167 @@ Authorization: Bearer <your-jwt-token>
 ## 👥 UserController
 
 **Base Path**: `/users`  
-**Description**: Gestion publique des utilisateurs
+**Description**: Gestion publique des utilisateurs  
+**Status**: ✅ 6/10 endpoints principaux vérifiés (2025-12-10)
 
-### Endpoints
+### Endpoints Principaux (TESTÉS ✅)
 
-| Méthode | Endpoint | Description | Sécurité |
-|---------|----------|-------------|----------|
-| `POST` | `/users/register` | Enregistrement public | Public |
-| `GET` | `/users/me` | Profil utilisateur actuel | Authentifié |
-| `PUT` | `/users/{id}` | Mise à jour utilisateur | Authentifié |
-| `GET` | `/users` | Liste tous les utilisateurs | ADMIN/DEVELOPER |
-| `GET` | `/users/{id}` | Détails utilisateur par ID | Authentifié |
-| `DELETE` | `/users/{id}` | Supprimer utilisateur | ADMIN |
-| `PUT` | `/users/{id}/password` | Changer mot de passe utilisateur | Authentifié |
-| `POST` | `/users/{id}/reset-password` | Reset mot de passe | ADMIN |
-| `POST` | `/users/change-password` | Changer mot de passe personnel | Authentifié |
-| `POST` | `/users/forgot-password` | Demander reset mot de passe | Public |
+| Méthode | Endpoint | Description | Sécurité | Status Test |
+|---------|----------|-------------|----------|-------------|
+| `POST` | `/users/register` | ✅ Enregistrement public | Public | FUNCIONANDO |
+| `GET` | `/users/me` | Profil utilisateur actuel | Authentifié | Non testé |
+| `PUT` | `/users/{id}` | ✅ Mise à jour utilisateur | Authentifié | FUNCIONANDO |
+| `GET` | `/users` | ✅ Liste tous les utilisateurs | ADMIN/DEVELOPER | FUNCIONANDO |
+| `GET` | `/users/{id}` | ✅ Détails utilisateur par ID | Authentifié | FUNCIONANDO |
+| `DELETE` | `/users/{id}` | ✅ Supprimer utilisateur | ADMIN | FUNCIONANDO |
+| `PUT` | `/users/{id}/password` | Changer mot de passe utilisateur | Authentifié | Non testé |
+| `POST` | `/users/{id}/reset-password` | ✅ Reset mot de passe | ADMIN | FUNCIONANDO |
+| `POST` | `/users/change-password` | Changer mot de passe personnel | Authentifié | Non testé |
+| `POST` | `/users/forgot-password` | Demander reset mot de passe | Public | Non testé |
+
+### 📋 Validation et Règles Métier (Vérifié 2025-12-10)
+
+#### POST `/users/register` - Création Utilisateur
+**Campos Obligatorios:**
+- `firstName` (String, NotBlank) - Prénom de l'utilisateur
+- `lastName` (String, NotBlank) - Nom de famille
+- `email` (String, Email, Unique) - Email unique dans le système
+- `password` (String, MinLength) - Mot de passe sécurisé
+
+**Comportement par Défaut:**
+- `role`: `ROLE_EMPLOYEE` (rôle par défaut)
+- `isActive`: `true` (utilisateur actif)
+- `createdAt`: Timestamp automatique
+
+#### PUT `/users/{id}` - Modification Utilisateur
+**Campos Modificables:**
+- `firstName` (String) - Prénom
+- `lastName` (String) - Nom de famille  
+- `email` (String, Email, Unique) - Email (doit rester unique)
+
+**🚫 Campos NO Modificables:**
+- `id` - UUID généré automatiquement
+- `role` - Géré par endpoints admin séparés
+- `password` - Géré par endpoints de mot de passe
+- `isActive` - Géré par endpoints admin
+- `createdAt`, `updatedAt` - Timestamps automatiques
+
+#### DELETE `/users/{id}` - Suppression
+- **Type**: Hard delete (suppression permanente)
+- **Permissions**: ADMIN/DEVELOPER uniquement
+- **Effet**: Utilisateur supprimé complètement du système
+
+### ⚠️ Validations et Erreurs
+
+#### Erreurs Communes
+- **409 Conflict**: Email déjà existant lors de l'inscription
+- **403 Forbidden**: Permissions insuffisantes pour accès admin
+- **404 Not Found**: Utilisateur inexistant
+- **400 Bad Request**: Données de validation invalides
+
+### 📚 Exemples Vérifiés (Testing 2025-12-10)
+
+#### ✅ Exemple Inscription Uti
+```http
+POST /api/users/register
+Content-Type: application/json; charset=utf-8
+
+{
+  "firstName": "Juan",
+  "lastName": "Perez",
+  "email": "juan.perez@stockchef.com",
+  "password": "userPass123!"
+}
+```
+**Réponse (201 Created) :**
+```json
+{
+  "id": "edf43815-cbf8-45dc-94cc-cc30ea2457eb",
+  "email": "juan.perez@stockchef.com",
+  "firstName": "Juan",
+  "lastName": "Perez",
+  "fullName": "Juan Perez",
+  "role": "ROLE_EMPLOYEE",
+  "effectiveRole": "ROLE_EMPLOYEE",
+  "isActive": true,
+  "createdAt": "2025-12-10T10:15:30",
+  "lastLoginAt": null,
+  "createdBy": "system"
+}
+```
+
+#### ✅ Exemple Modification Utilisateur (PUT)
+```http
+PUT /api/users/edf43815-cbf8-45dc-94cc-cc30ea2457eb
+Authorization: Bearer <admin_token>
+Content-Type: application/json; charset=utf-8
+
+{
+  "firstName": "Juan Carlos",
+  "lastName": "Perez Gonzalez",
+  "email": "juan.perez@stockchef.com"
+}
+```
+**Réponse (200 OK) :**
+```json
+{
+  "id": "edf43815-cbf8-45dc-94cc-cc30ea2457eb",
+  "fullName": "Juan Carlos Perez Gonzalez",
+  "email": "juan.perez@stockchef.com",
+  "role": "ROLE_EMPLOYEE",
+  "isActive": true,
+  "updatedAt": "2025-12-10T10:20:15"
+}
+```
+
+#### ✅ Exemple Listage Utilisateurs (GET)
+```http
+GET /api/users
+Authorization: Bearer <admin_token>
+```
+**Réponse (200 OK) :**
+```json
+[
+  {
+    "id": "6867ddb2-5df4-4272-805e-08e0d2625ab4",
+    "fullName": "Developer Admin",
+    "email": "developer@stockchef.com",
+    "role": "ROLE_DEVELOPER",
+    "isActive": true
+  },
+  {
+    "id": "edf43815-cbf8-45dc-94cc-cc30ea2457eb",
+    "fullName": "Juan Carlos Perez Gonzalez",
+    "email": "juan.perez@stockchef.com",
+    "role": "ROLE_EMPLOYEE",
+    "isActive": true
+  }
+]
+```
+
+#### ❌ Erreurs Communes et Solutions
+
+**Erreur 409 - Email existant :**
+```json
+// ❌ Réponse d'erreur
+{
+  "timestamp": "2025-12-10T10:25:00",
+  "status": 409,
+  "error": "Conflict",
+  "message": "Email déjà utilisé dans le système"
+}
+```
+
+**Erreur 403 - Permissions insuffisantes :**
+```json
+// ❌ Réponse d'erreur
+{
+  "timestamp": "2025-12-10T10:25:00",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Accès refusé - Permissions ADMIN requises"
+}
+```
 
 ### DTOs Utilisés
 - **Request**: `RegisterRequest`, `UpdateUserRequest`, `ChangePasswordRequest`, `ResetPasswordRequest`, `ForgotPasswordRequest`
@@ -1906,6 +2052,14 @@ GET http://localhost:8090/api/inventory/produits/999
 - [ ] **Inventory List**: GET `/inventory/produits` con paginación ✅ VERIFICADO
 - [ ] **Product Form**: POST/PUT `/inventory/produits/{id}` ✅ VERIFICADO
 - [ ] **Reports Dashboard**: 8/11 endpoints funcionando ✅ PARCIALMENTE VERIFICADO
+- [x] **User Management**: CRUD de usuarios ✅ 6/10 endpoints principales verificados
+  - [x] Registro público (POST /users/register)
+  - [x] Lista usuarios admin (GET /users)
+  - [x] Detalles usuario (GET /users/{id})
+  - [x] Modificar usuario (PUT /users/{id})
+  - [x] Eliminar usuario (DELETE /users/{id}) - ⚠️ Hard delete
+  - [x] Reset contraseña admin (POST /users/{id}/reset-password)
+  - [ ] Password management endpoints (requieren más testing)
 - [x] **Menu Management**: CRUD de menús ✅ 5/5 endpoints principales verificados
   - [x] Crear menú (POST /menus)
   - [x] Listar menús paginado (GET /menus) 
@@ -1976,6 +2130,13 @@ GET  /api/inventory/produits/low-stock          # ❌ Error interno
 - **❌ Estadísticas**: Por unidad, categoría y stock bajo (Error 500)
 - **🔧 Acción Requerida**: Review backend implementation para estos endpoints
 
+### 📊 Estado del Testing de Usuarios
+- **8 Usuarios Activos**: 4 predeterminados + 4 creados durante testing
+- **1 Usuario Eliminado**: Hard delete verificado (Luis Rodriguez)
+- **1 Usuario Modificado**: Juan Carlos Perez Gonzalez (nombre actualizado)
+- **Validaciones**: Email único, roles por defecto (ROLE_EMPLOYEE)
+- **Permisos**: Admin puede listar, modificar y eliminar usuarios
+
 ### 📊 Estado del Inventario de Testing
 - **17 Productos Activos**: Creados durante testing CRUD
 - **1 Producto Eliminado**: Soft delete verificado (ID 1)
@@ -1986,7 +2147,7 @@ GET  /api/inventory/produits/low-stock          # ❌ Error interno
 1. **Base URL**: `http://localhost:8090/api` (Confirmada)
 2. **Autenticación**: `developer@stockchef.com / devpass123` (Verificada)
 3. **Headers**: `Authorization: Bearer {token}` + `Content-Type: application/json; charset=utf-8`
-4. **Endpoints Core**: 8 endpoints principales funcionando al 100%
+4. **Endpoints Core**: Inventario (8/11), Menús (5/5), Usuarios (6/10) funcionando
 5. **Soft Delete**: Implementado correctamente - considerar en UI
 
 ### 🔍 Recomendaciones para Frontend
