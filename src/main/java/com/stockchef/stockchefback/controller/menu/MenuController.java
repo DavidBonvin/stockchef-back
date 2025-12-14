@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * Contrôleur REST pour la gestion des menus
@@ -133,8 +134,8 @@ public class MenuController {
     @GetMapping("/recherche")
     public ResponseEntity<Page<MenuResponseDTO>> rechercherMenus(
             @RequestParam(required = false) String nom,
-            @RequestParam(required = false) LocalDate dateDe,
-            @RequestParam(required = false) LocalDate dateA,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDe,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateA,
             Pageable pageable) {
         
         log.info("Recherche menus - Nom: {}, DateDe: {}, DateA: {}", nom, dateDe, dateA);
@@ -280,12 +281,12 @@ public class MenuController {
     }
     
     /**
-     * Obtenir les menus réalisables pour une date donnée
+     * Obtenir les menus réalisables pour une date
      * GET /api/menus/realisables
      */
     @GetMapping("/realisables")
     public ResponseEntity<List<MenuResponseDTO>> obtenirMenusRealisables(
-            @RequestParam(required = false) LocalDate date) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         
         LocalDate dateRecherche = date != null ? date : LocalDate.now();
         log.info("Recherche menus réalisables pour le: {}", dateRecherche);
