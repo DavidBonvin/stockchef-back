@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Contrôleur REST pour la gestion des menus
@@ -75,13 +78,52 @@ public class MenuController {
      */
     @GetMapping
     public ResponseEntity<Page<MenuResponseDTO>> listerMenus(Pageable pageable) {
-        log.info("Récupération des menus - Page: {}, Taille: {}", 
-                pageable.getPageNumber(), pageable.getPageSize());
-        
-        Page<Menu> menus = menuService.listerMenus(pageable);
-        Page<MenuResponseDTO> response = menus.map(this::convertirMenuEnDTO);
-        
-        return ResponseEntity.ok(response);
+        try {
+            log.info("Récupération des menus - Page: {}, Taille: {}", 
+                    pageable.getPageNumber(), pageable.getPageSize());
+            
+            Page<Menu> menus = menuService.listerMenus(pageable);
+            log.info("Menus trouvés: {}", menus.getTotalElements());
+            
+            Page<MenuResponseDTO> response = menus.map(this::convertirMenuEnDTOSafe);
+            log.info("Conversion DTO réussie pour {} menus", response.getContent().size());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des menus", e);
+            throw new RuntimeException("Erreur lors de la récupération des menus: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Endpoint de diagnostic pour les menus (version simple)
+     * GET /api/menus/simple
+     */
+    @GetMapping("/simple")
+    public ResponseEntity<List<Map<String, Object>>> listerMenusSimple() {
+        try {
+            log.info("Diagnostic: Récupération simple des menus");
+            
+            Page<Menu> menus = menuService.listerMenus(Pageable.unpaged());
+            
+            List<Map<String, Object>> response = menus.getContent().stream()
+                .map(menu -> {
+                    Map<String, Object> simpleMenu = new HashMap<>();
+                    simpleMenu.put("id", menu.getId());
+                    simpleMenu.put("nom", menu.getNom());
+                    simpleMenu.put("dateService", menu.getDateService());
+                    simpleMenu.put("statut", menu.getStatut().name());
+                    simpleMenu.put("dateCreation", menu.getDateCreation());
+                    return simpleMenu;
+                })
+                .collect(Collectors.toList());
+            
+            log.info("Diagnostic réussi: {} menus trouvés", response.size());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Erreur dans le diagnostic des menus", e);
+            throw new RuntimeException("Erreur diagnostic: " + e.getMessage());
+        }
     }
     
     /**
@@ -272,6 +314,111 @@ public class MenuController {
         return ResponseEntity.ok(response);
     }
     
+    /**
+     * Convertit une entité Menu en DTO de réponse (version sécurisée avec gestion d'erreurs)
+     */
+    private MenuResponseDTO convertirMenuEnDTOSafe(Menu menu) {
+        try {
+            return MenuResponseDTO.builder()
+                .id(menu.getId())
+                .nom(menu.getNom())
+                .description(menu.getDescription())
+                .dateService(menu.getDateService())
+                .dateCreation(menu.getDateCreation())
+                .dateModification(menu.getDateModification())
+                .statut(menu.getStatut())
+                .prixVente(menu.getPrixVente())
+                .coutTotalIngredients(menu.getCoutTotalIngredients() != null ? menu.getCoutTotalIngredients() : BigDecimal.ZERO)
+                .marge(safeCalculerMarge(menu))
+                .margePercentage(menu.getMargePercentage() != null ? menu.getMargePercentage() : BigDecimal.ZERO)
+                .peutEtrePrepare(safePeutEtrePrepare(menu))
+                .ingredients(safeConvertirIngredients(menu))
+                .build();
+        } catch (Exception e) {
+            log.error("Erreur lors de la conversion du menu {} en DTO", menu.getId(), e);
+            // Retourner un DTO minimal en cas d'erreur
+            return MenuResponseDTO.builder()
+                .id(menu.getId())
+                .nom(menu.getNom())
+                .description(menu.getDescription())
+                .dateService(menu.getDateService())
+                .statut(menu.getStatut())
+                .prixVente(menu.getPrixVente())
+                .coutTotalIngredients(BigDecimal.ZERO)
+                .marge(BigDecimal.ZERO)
+                .margePercentage(BigDecimal.ZERO)
+                .peutEtrePrepare(false)
+                .ingredients(List.of())
+                .build();
+        }
+    }
+
+    private BigDecimal safeCalculerMarge(Menu menu) {
+        try {
+            return menu.calculerMarge();
+        } catch (Exception e) {
+            log.warn("Erreur calcul marge pour menu {}: {}", menu.getId(), e.getMessage());
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private Boolean safePeutEtrePrepare(Menu menu) {
+        try {
+            return menu.peutEtrePrepare();
+        } catch (Exception e) {
+            log.warn("Erreur vérification préparation pour menu {}: {}", menu.getId(), e.getMessage());
+            return false;
+        }
+    }
+
+    private List<MenuIngredientDTO> safeConvertirIngredients(Menu menu) {
+        try {
+            if (menu.getIngredients() == null) {
+                return List.of();
+            }
+            return menu.getIngredients().stream()
+                .map(this::convertirIngredientEnDTOSafe)
+                .toList();
+        } catch (Exception e) {
+            log.warn("Erreur conversion ingrédients pour menu {}: {}", menu.getId(), e.getMessage());
+            return List.of();
+        }
+    }
+
+    private MenuIngredientDTO convertirIngredientEnDTOSafe(MenuIngredient ingredient) {
+        try {
+            return MenuIngredientDTO.builder()
+                .id(ingredient.getId())
+                .produitId(ingredient.getProduit() != null ? ingredient.getProduit().getId() : null)
+                .produitNom(ingredient.getProduit() != null ? ingredient.getProduit().getNom() : "Produit inconnu")
+                .quantiteNecessaire(ingredient.getQuantiteNecessaire())
+                .uniteUtilisee(ingredient.getUniteUtilisee())
+                .quantiteConvertieStockUnit(ingredient.getQuantiteConvertieStockUnit())
+                .coutIngredient(ingredient.getCoutIngredient() != null ? ingredient.getCoutIngredient() : BigDecimal.ZERO)
+                .notes(ingredient.getNotes())
+                .stockSuffisant(safeStockSuffisant(ingredient))
+                .quantiteManquante(null) // Calculé côté client si nécessaire
+                .build();
+        } catch (Exception e) {
+            log.error("Erreur conversion ingrédient {}: {}", ingredient.getId(), e.getMessage());
+            return MenuIngredientDTO.builder()
+                .id(ingredient.getId())
+                .produitNom("Erreur de conversion")
+                .quantiteNecessaire(BigDecimal.ZERO)
+                .stockSuffisant(false)
+                .build();
+        }
+    }
+
+    private Boolean safeStockSuffisant(MenuIngredient ingredient) {
+        try {
+            return ingredient.stockSuffisant();
+        } catch (Exception e) {
+            log.warn("Erreur vérification stock pour ingrédient {}: {}", ingredient.getId(), e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Convertit une entité Menu en DTO de réponse
      */
