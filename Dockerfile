@@ -25,13 +25,14 @@ RUN ./mvnw clean package -DskipTests
 # Exposer le port de l'application
 EXPOSE 8090
 
-# Variables d'environnement par défaut
-ENV SPRING_PROFILES_ACTIVE=dev
+# Variables d'environnement par défaut (Render compatible)
+ENV SPRING_PROFILES_ACTIVE=production
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
+ENV SERVER_PORT=8090
 
-# Comando de health check (Railway compatible)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8090/api/actuator/health || exit 1
+# Health check pour Render (endpoint /api/health)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
+    CMD curl -f http://localhost:8090/api/health || exit 1
 
-# Exécuter l'application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar target/stockchef-back-*.jar"]
+# Exécuter l'application (Render optimized)
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar target/stockchef-back-*.jar --server.port=${PORT:-8090}"]

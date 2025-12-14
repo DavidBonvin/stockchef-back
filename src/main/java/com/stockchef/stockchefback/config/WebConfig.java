@@ -13,9 +13,22 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:4200", "http://localhost:5173")
+                .allowedOrigins(
+                    // Desarrollo local
+                    "http://localhost:3000", 
+                    "http://localhost:4200", 
+                    "http://localhost:5173",
+                    "http://localhost:5174",
+                    // Producción Render
+                    "https://stockchef-back.onrender.com",
+                    "https://*.onrender.com",
+                    // Otras plataformas
+                    "https://*.vercel.app",
+                    "https://*.netlify.app"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }
