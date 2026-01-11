@@ -43,18 +43,16 @@ public class SecurityConfig {
             
             // Configurer l'autorisation des requests
             .authorizeHttpRequests(authz -> authz
+                // Permitir acceso público a health checks (Railway/Render)
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/health", "/health/**").permitAll()
+                .requestMatchers("/").permitAll()
                 // Permettre l'accès sans authentification aux endpoints d'auth
                 .requestMatchers("/auth/**").permitAll()
                 // Permettre l'accès public à l'inscription d'utilisateurs
                 .requestMatchers("/users/register").permitAll()
                 // Permettre l'accès public à forgot-password
                 .requestMatchers("/users/forgot-password").permitAll()
-                // Permettre l'accès aux endpoints de health
-                .requestMatchers("/health", "/health/**").permitAll()
-                // Permettre l'accès aux endpoints d'Actuator
-                .requestMatchers("/actuator/**").permitAll()
-                // Endpoint racine pour Railway health checks
-                .requestMatchers("/").permitAll()
                 // Toutes les autres routes nécessitent une authentification
                 .anyRequest().authenticated()
             )
